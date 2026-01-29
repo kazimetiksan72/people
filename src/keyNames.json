@@ -1,0 +1,18 @@
+{
+    "matrikul": "Matrikül", 
+    "tekrisTarihi": "Tekris Tarihi",
+    "dogumYeri": "Doğum Yeri",
+    "dogumTarihi": "Doğum Tarihi",
+    "kanGrubu": "Kan Grubu",
+    "meslegi": "Mesleği",
+    "isi": "İşi",
+    "medeniHali": "Medeni Hal",
+    "esininAdi": "Eşinin Adı",
+    "dogumTarihi2": "Eşinin Doğum Tarihi",
+    "cocuklar": "Çocukları",
+    "dogumTarihleri": "Çocukların Doğum Tarihleri",
+    "evAdresi": "Ev Adresi",
+    "isAdresi": "İş Adresi",
+    "tlfGsmEvIs": "Telefon",
+    "ePosta": "E-Posta"
+}

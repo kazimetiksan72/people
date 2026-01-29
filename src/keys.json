@@ -12,5 +12,7 @@
     "cocuklar",
     "dogumTarihleri",
     "evAdresi",
-    "isAdresi"
+    "isAdresi",
+    "tlfGsmEvIs",
+    "ePosta"
 ]
