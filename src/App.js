@@ -213,7 +213,7 @@ function App() {
             <div>
               <Button variant='success' onClick={(e) => {
                     e.preventDefault()
-                    window.location.href = "https://wa.me/:+90"+p["tlfGsmEvIs"]
+                    window.location.href = "https://wa.me/0"+p["tlfGsmEvIs"]
               }}>Whatsapp Yaz</Button>
             </div>
           </div>
