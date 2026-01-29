@@ -2,6 +2,8 @@ import './App.css';
 import list from './kisiler.json'
 import keys from './keys.json'
 import keyNames from './keyNames.json'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import {Button} from 'react-bootstrap'
 
 const printStyles = `
 
@@ -188,7 +190,7 @@ function App() {
                       }}>
                         <a className='link' href='/deneme' onClick={(e) => {
                           e.preventDefault();
-                          onPhoneClick(p[key]);
+                          onPhoneClick('0'+p[key]);
                         }}>{p[key]}</a>
                       </div>
                   </>
@@ -207,6 +209,12 @@ function App() {
                   }
                 )
               }
+            </div>
+            <div>
+              <Button variant='success' onClick={(e) => {
+                    e.preventDefault()
+                    window.location.href = "https://wa.me/:+90"+p["tlfGsmEvIs"]
+              }}>Whatsapp Yaz</Button>
             </div>
           </div>
         )
