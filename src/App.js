@@ -1,4 +1,3 @@
-import './App.css';
 import list from './kisiler.json'
 import keys from './keys.json'
 import keyNames from './keyNames.json'
@@ -6,6 +5,22 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {Button} from 'react-bootstrap'
 
 const printStyles = `
+
+  .main {
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+  }
+
+  .mobileShow {
+    display: none;
+  }
+
+  .profileImage {
+    max-width: 200px;
+    max-height: 300px;
+    border: "1px solid #000000";
+  }
 
   body, html {
       margin: 0;
@@ -19,6 +34,31 @@ const printStyles = `
       background-attachment: fixed;  /* scroll ile hareket etmez */
     }
 
+  @media screen and (max-width: 767px) and (orientation: portrait) {
+    .menu {
+      position: fixed;
+      bottom: 0;
+    }
+
+    .profileImage {
+      max-width: 100px;
+      max-height: 200px;
+      border: "1px solid #000000";
+    }
+
+
+    .no-print {
+      max-width: 100px
+    }
+
+    .webShow {
+      display: none !important;
+    }
+
+    .mobileShow {
+      display: inline;
+    }
+  }
 
   @media print {
     /* Yazdırırken sayfa kenar boşluklarını sıfırla (isteğe bağlı) */
@@ -94,7 +134,7 @@ function App() {
 
   const onPhoneClick = (phone) => {
     console.log(phone)
-    window.location.href = "phone:"+phone
+    window.location.href = "tel:0"+phone
   }
 
   const handlePrint = () => {
@@ -102,7 +142,7 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="main">
       <style>{printStyles}</style>
       <button
         className="no-print" // Bu sınıf sayesinde PDF'te çıkmayacak
@@ -123,30 +163,27 @@ function App() {
           fontSize: '16px'
         }}
       >
-        📄 PDF Olarak Kaydet
+        <span className='webShow'>PDF Olarak Kaydet</span>
+        <span className='mobileShow'>PDF</span>
       </button>
       {
         reOrdered()
         .map(p =>
-          <div className="full-page-item" style={{
+          <div key={p.matrikul} className="full-page-item" style={{
             minHeight: '100vh', // En az bir ekran boyu yer kapla
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center', // Dikeyde tam ortaya getir
-            padding: '40px',
+            padding: '10px',
             borderBottom: '1px dashed #ccc', // Ekranda ayrımı görmek için
             boxSizing: 'border-box'
           }}>
             <div>
               <img 
+                className='profileImage'
                 alt={p.adSoyad}
                 src={"https://idaimages.blob.core.windows.net/matrikul/"+p.matrikul+".jpg"} 
-                style={{
-                  maxWidth: 200,
-                  maxHeight: 300,
-                  border: "1px solid #000000",
-                }}
-                />
+              />
             </div>
             <div className='lato-black' style={{
               fontSize: 22
@@ -210,11 +247,22 @@ function App() {
                 )
               }
             </div>
-            <div>
+            <div className='mobileShow' style={{
+              display: 'flex',
+              justifyContent: 'space-evenly'
+            }}>
+              <Button variant='primary' onClick={(e) => {
+                    e.preventDefault()
+                    onPhoneClick(p["tlfGsmEvIs"])
+              }}>Telefon Et</Button>
               <Button variant='success' onClick={(e) => {
                     e.preventDefault()
                     window.location.href = "https://wa.me/90"+p["tlfGsmEvIs"]
               }}>Whatsapp Yaz</Button>
+              <Button variant='warning' onClick={(e) => {
+                    e.preventDefault()
+                    onMailClick(p["ePosta"])
+              }}>Email Gönder</Button>
             </div>
           </div>
         )
