@@ -50,7 +50,7 @@ const printStyles = `
       color: #000000
     }
     
-    /* Her kartın kendinden sonra yeni sayfa başlatmasını sağlar */
+    /* Her kartın kendinden sonra asdads yeni sayfa başlatmasını sağlar */
     .full-page-item {
       page-break-after: always; /* Eski tarayıcılar için */
       break-after: page;        /* Modern tarayıcılar için */
