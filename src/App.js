@@ -137,6 +137,7 @@ function App() {
           }}>
             <div>
               <img 
+                alt={p.adSoyad}
                 src={"https://idaimages.blob.core.windows.net/matrikul/"+p.matrikul+".jpg"} 
                 style={{
                   maxWidth: 200,
@@ -168,13 +169,13 @@ function App() {
                         textAlign: 'left',
                         whiteSpace: 'nowrap',
                       }}>
-                        <a className='link' href='#' onClick={(e) => {
+                        <a className='link' href='/deneme' onClick={(e) => {
                           e.preventDefault();
                           onMailClick(p[key]);
                         }}>{p[key]}</a>
                       </div>
                   </>
-                  )} else if (key == 'tlfGsmEvIs') { 
+                  )} else if (key === 'tlfGsmEvIs') { 
                     return (
                     <>
                       <div className='lato-bold' style={{
@@ -185,7 +186,7 @@ function App() {
                         textAlign: 'left',
                         whiteSpace: 'nowrap',
                       }}>
-                        <a className='link' href='#' onClick={(e) => {
+                        <a className='link' href='/deneme' onClick={(e) => {
                           e.preventDefault();
                           onPhoneClick(p[key]);
                         }}>{p[key]}</a>
