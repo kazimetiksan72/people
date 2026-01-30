@@ -224,7 +224,7 @@ function App() {
               <img 
                 className='profileImage'
                 alt={p.adSoyad}
-                src={"https://idaimages.blob.core.windows.net/matrikul/"+p.matrikul+".jpg"} 
+                src={"./images/"+p.matrikul+".jpg"} 
               />
             </div>
             <div className='profileName'>{p.adSoyad}</div>
