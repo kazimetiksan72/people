@@ -6,6 +6,11 @@ import {Button} from 'react-bootstrap'
 
 import SpinningCornerImage from './SpinningCornerImage';
 
+import {BrowserRouter, Routes, Route} from 'react-router-dom'
+
+import SignIn from './SignIn'
+import SignUp from './SignUp';
+
 const printStyles = `
 
     .no-print {
@@ -288,4 +293,19 @@ function App() {
   );
 }
 
-export default App;
+const Routed = () => {
+  return (
+    <>
+      <BrowserRouter>
+          <Routes>
+            <Route path='/' element={<App />} />
+            <Route path='/signup' element={<SignUp />} />
+            <Route path='/signin' element={<SignIn />} />
+            <Route path='*' element={<App />} />
+          </Routes>
+      </BrowserRouter>
+    </>
+  )
+}
+
+export default Routed;
