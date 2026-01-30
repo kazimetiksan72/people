@@ -90,9 +90,9 @@ const printStyles = `
     }
 
     .contactButtons {
-      display: flex;
-      justify-content: space-evenly;
-      margin-top: 20px
+      display: block;
+      flex-diretion: column;
+      margin-left: 30px
     }
   }
 
@@ -216,9 +216,16 @@ function App() {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center', // Dikeyde tam ortaya getir
-            padding: '10px',
+            margin: '10px',
+            marginTop: '50px',
             borderBottom: '1px dashed #ccc', // Ekranda ayrımı görmek için
             boxSizing: 'border-box'
+          }}>
+          <div style={{
+            display: 'flex',
+            textAlign: 'center',
+            justifyContent: 'center',
+            flexDirection: 'row'
           }}>
             <div>
               <img 
@@ -226,8 +233,29 @@ function App() {
                 alt={p.adSoyad}
                 src={"./images/"+p.matrikul+".jpg"} 
               />
+              <div className='profileName'>{p.adSoyad}</div>
             </div>
-            <div className='profileName'>{p.adSoyad}</div>
+            <div className='contactButtons'>
+              <div>
+                <Button variant='primary' style={{width: 150}} onClick={(e) => {
+                      e.preventDefault()
+                      onPhoneClick(p["tlfGsmEvIs"])
+                }}>Telefon Et</Button>
+              </div>
+              <div style={{marginTop: 20}}>
+                <Button variant='success' style={{width: 150}} onClick={(e) => {
+                      e.preventDefault()
+                      window.location.href = "https://wa.me/90"+p["tlfGsmEvIs"]
+                }}>Whatsapp Yaz</Button>
+              </div>
+              <div style={{marginTop: 20}}>
+                <Button variant='warning' style={{width: 150}} onClick={(e) => {
+                      e.preventDefault()
+                      onMailClick(p["ePosta"])
+                }}>Email Gönder</Button>
+              </div>
+            </div>
+          </div>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'max-content 1fr', // 1. sütun içeriğe göre, 2. sütun kalan boşluğa göre
@@ -252,20 +280,6 @@ function App() {
                   }
                 )
               }
-            </div>
-            <div className='contactButtons'>
-              <Button variant='primary' onClick={(e) => {
-                    e.preventDefault()
-                    onPhoneClick(p["tlfGsmEvIs"])
-              }}>Telefon Et</Button>
-              <Button variant='success' onClick={(e) => {
-                    e.preventDefault()
-                    window.location.href = "https://wa.me/90"+p["tlfGsmEvIs"]
-              }}>Whatsapp Yaz</Button>
-              <Button variant='warning' onClick={(e) => {
-                    e.preventDefault()
-                    onMailClick(p["ePosta"])
-              }}>Email Gönder</Button>
             </div>
           </div>
         )
