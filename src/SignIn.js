@@ -3,13 +3,10 @@ import {
 } from 'react-bootstrap'
 
 import {
-    useState,
-    useEffect
+    useState
 } from 'react'
 
 import Button from './Button'
-
-import axios from 'axios'
 
 // import {
 //     useDispatch,

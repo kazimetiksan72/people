@@ -1,8 +1,4 @@
-import * as RBTrap from 'react-bootstrap';
-
 import {
-    Modal,
-    Dropdown,
     Button as RButton
 } from 'react-bootstrap'
 
