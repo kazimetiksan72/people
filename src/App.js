@@ -47,7 +47,7 @@ const printStyles = `
       padding: 0;
       height: 100%;
       width: 100%;
-      background-image: url("https://idaimages.blob.core.windows.net/matrikul/gonye.png"); /* görsel yolu */
+      background-image: url("./gonye.png"); /* görsel yolu */
       background-repeat: no-repeat;
       background-position: center center;
       background-size: contain;        /* ekranı tamamen kaplar */
