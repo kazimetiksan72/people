@@ -164,6 +164,7 @@ function App() {
   const reOrdered = () => {
     const ordered = list.sort((a, b) => parseInt(a.matrikul) > parseInt(b.matrikul))
     console.log(ordered)
+    console.log('sayısı', ordered.length)
     return ordered
   }
 
