@@ -184,7 +184,7 @@ function App() {
   return (
     <div className="main">
       <style>{printStyles}</style>
-      <SpinningCornerImage src="./olive.png" size={300} speed={0.3} />
+      <SpinningCornerImage src="./olive.png" size={200} speed={0.1} />
       <button
         className="no-print" // Bu sınıf sayesinde PDF'te çıkmayacak
         onClick={handlePrint}

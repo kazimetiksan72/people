@@ -5,7 +5,7 @@ export default function SpinningCornerImage({
   alt = "Spinning logo",
   size = 80,
   speed = 0.25, // scrollY * speed = derece (0.25 => 1000px scroll ≈ 250deg)
-  offset = 16,  // köşeden boşluk (px)
+  offset = 10,  // köşeden boşluk (px)
 }) {
   const imgRef = useRef(null);
   const rafRef = useRef(null);
@@ -36,7 +36,7 @@ export default function SpinningCornerImage({
         lastRotationRef.current = rotation;
 
         if (imgRef.current) {
-          imgRef.current.style.transform = `perspective(800px) rotateY(${rotation}deg)`;
+          imgRef.current.style.transform = `perspective(600px) rotateY(${rotation}deg)`;
         }
       });
     };
@@ -59,7 +59,6 @@ export default function SpinningCornerImage({
         position: "fixed",
         top: offset,
         right: offset,
-        width: size,
         height: size,
         zIndex: 9999,
         pointerEvents: "none",
