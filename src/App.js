@@ -71,8 +71,8 @@ const printStyles = `
     }
 
     .profileImage {
-      max-width: 100px;
-      max-height: 200px;
+      max-width: 160px;
+      max-height: 240px;
       border: 1px solid #000000;
     }
 
