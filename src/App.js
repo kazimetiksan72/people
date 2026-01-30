@@ -6,6 +6,15 @@ import {Button} from 'react-bootstrap'
 
 const printStyles = `
 
+  .profileName {
+    font-size: 22px;
+    font-family: "Lato", sans-serif;
+    font-weight: 900;
+    font-style: normal;
+    margin-top: 10px;
+    margin-bottom: 10px
+  }
+
   .main {
     margin: 0px;
     padding: 0px;
@@ -16,10 +25,14 @@ const printStyles = `
     display: none;
   }
 
+  .contactButtons {
+    display: none;
+  }
+
   .profileImage {
     max-width: 200px;
     max-height: 300px;
-    border: "1px solid #000000";
+    border: 1px solid #000000;
   }
 
   body, html {
@@ -35,6 +48,16 @@ const printStyles = `
     }
 
   @media screen and (max-width: 767px) and (orientation: portrait) {
+
+    .profileName {
+      font-size: 16px;
+      font-family: "Lato", sans-serif;
+      font-weight: 900;
+      font-style: normal;
+      margin-top: 5px;
+      margin-bottom: 5px
+    }
+
     .menu {
       position: fixed;
       bottom: 0;
@@ -43,7 +66,7 @@ const printStyles = `
     .profileImage {
       max-width: 100px;
       max-height: 200px;
-      border: "1px solid #000000";
+      border: 1px solid #000000;
     }
 
 
@@ -57,6 +80,12 @@ const printStyles = `
 
     .mobileShow {
       display: inline;
+    }
+
+    .contactButtons {
+      display: flex;
+      justify-content: space-evenly;
+      margin-top: 20px
     }
   }
 
@@ -114,6 +143,10 @@ const printStyles = `
     }
 
     .no-print {
+      display: none !important;
+    }
+
+    .contactButtons {
       display: none !important;
     }
   }
@@ -185,53 +218,17 @@ function App() {
                 src={"https://idaimages.blob.core.windows.net/matrikul/"+p.matrikul+".jpg"} 
               />
             </div>
-            <div className='lato-black' style={{
-              fontSize: 22
-            }}>{p.adSoyad}</div>
+            <div className='profileName'>{p.adSoyad}</div>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'max-content 1fr', // 1. sütun içeriğe göre, 2. sütun kalan boşluğa göre
-              gap: '10px', // Sütunlar arası boşluk,
+              gap: '5px', // Sütunlar arası boşluk,
               alignItems: 'start',
               fontSize: 18
             }}>
               {
                 keys.map(key => {
-                  if (key === 'ePosta') { 
-                    return (
-                    <>
-                      <div className='lato-bold' style={{
-                        textAlign: 'left',
-                        whiteSpace: 'nowrap',
-                      }}>{keyNames[key]}:</div>
-                      <div style={{
-                        textAlign: 'left',
-                        whiteSpace: 'nowrap',
-                      }}>
-                        <a className='link' href='/deneme' onClick={(e) => {
-                          e.preventDefault();
-                          onMailClick(p[key]);
-                        }}>{p[key]}</a>
-                      </div>
-                  </>
-                  )} else if (key === 'tlfGsmEvIs') { 
-                    return (
-                    <>
-                      <div className='lato-bold' style={{
-                        textAlign: 'left',
-                        whiteSpace: 'nowrap'
-                      }}>{keyNames[key]}:</div>
-                      <div style={{
-                        textAlign: 'left',
-                        whiteSpace: 'nowrap',
-                      }}>
-                        <a className='link' href='/deneme' onClick={(e) => {
-                          e.preventDefault();
-                          onPhoneClick('0'+p[key]);
-                        }}>{p[key]}</a>
-                      </div>
-                  </>
-                  )} else { return (
+                  return (
                     <>
                       <div className='lato-bold' style={{
                         textAlign: 'left',
@@ -242,15 +239,12 @@ function App() {
                         whiteSpace: 'nowrap'
                       }}>{p[key]}</div>
                   </>
-                  )}
+                  )
                   }
                 )
               }
             </div>
-            <div className='mobileShow' style={{
-              display: 'flex',
-              justifyContent: 'space-evenly'
-            }}>
+            <div className='contactButtons'>
               <Button variant='primary' onClick={(e) => {
                     e.preventDefault()
                     onPhoneClick(p["tlfGsmEvIs"])
