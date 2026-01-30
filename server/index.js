@@ -1,4 +1,4 @@
-// require('./db/mongoose');
+require('./db/mongoose');
 
 const express = require('express');
 const cors = require('cors');
@@ -10,8 +10,8 @@ app.use(cors());
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
-    // const routeUser = require('./routes/user');
-    // app.use('/api',routeUser);
+const routeUser = require('./routes/user');
+app.use('/api',routeUser);
 
 const publicPath = path.join(__dirname, '..', 'build')
 app.use(express.static(publicPath))

@@ -5,21 +5,63 @@ const bcrypt = require('bcryptjs')
 
 const secretWord = 's@me!secret'
 
-
 const UserSchema = new mongoose.Schema({
-  name: {
+  matrikul: {
     type: String
   },
-  email: {
+  tekrisTarihi: {
     type: String
   },
-  password: {
+  dogumYeri: {
+    type: String
+  },
+  dogumTarihi: {
+    type: String
+  },
+  kanGrubu: {
+    type: String
+  },
+  meslegi: {
+    type: String
+  },
+  isi: {
+    type: String
+  },
+  medeniHali: {
+    type: String
+  },
+  esininAdi: {
+    type: String
+  },
+  dogumTarihi2: {
+    type: String
+  },
+  cocuklar: {
+    type: String
+  },
+  dogumTarihleri: {
+    type: String
+  },
+  evAdresi: {
+    type: String
+  },
+  isAdresi: {
+    type: String
+  },
+  tlfGsmEvIs: {
+    type: String
+  },
+  ePosta: {
     type: String
   },
   xauth: {
     type: String
   },
   createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
     type: Date,
     default: Date.now
   }
@@ -36,31 +78,31 @@ UserSchema.methods.generateAuthToken = function () {
   })
 };
 
-UserSchema.statics.findByToken = async function (xauth) {
-  const User = this
-  let decoded
+// UserSchema.statics.findByToken = async function (xauth) {
+//   const User = this
+//   let decoded
 
-  try {
-    decoded = jwt.verify(xauth, secretWord)
-  } catch (e) {
+//   try {
+//     decoded = jwt.verify(xauth, secretWord)
+//   } catch (e) {
 
-    return Promise.reject()
-  }
+//     return Promise.reject()
+//   }
 
-  console.log('d', decoded)
+//   console.log('d', decoded)
 
-  return User.findOne({
-    _id: decoded._id,
-    xauth
-  })
-}
+//   return User.findOne({
+//     _id: decoded._id,
+//     xauth
+//   })
+// }
 
-UserSchema.statics.findByCredentials = function (email, password) {
+UserSchema.statics.findByCredentials = function (ePosta, matrikul) {
 
   // console.log(email, password)
 
   const User = this
-  return User.findOne({email})
+  return User.findOne({ePosta, matrikul})
   .then((user) => {
 
     if (!user) {
@@ -68,44 +110,45 @@ UserSchema.statics.findByCredentials = function (email, password) {
     }
 
     return new Promise((resolve, reject) => {
-      bcrypt.compare(password, user.password, (err, res) => {
-        if (res) {
-          resolve(user)
-        }
 
-        else {
-          reject()
-        }
-      })
+      if (user.matrikul === matrikul) {
+        return resolve()
+      } else {
+        return reject()
+      }
     })
   })
 }
 
-UserSchema.pre('save', function (next) {
+// UserSchema.pre('save', function (next) {
 
-  const user = this
+//   const user = this
 
-  if (user.isNew) {
-    user.createdAt = new Date().toISOString()
-    user.updatedAt = user.createdAt
-  }
+//   if (user.isNew) {
+//     user.createdAt = new Date().toISOString()
+//     user.updatedAt = user.createdAt
+//   }
 
-  else {
-    user.updatedAt = new Date().toISOString()
-  }
+//   else {
+//     user.updatedAt = new Date().toISOString()
+//   }
 
-  if (user.isModified('password')) {
+//   console.log('nexr', next)
 
-    bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(user.password, salt, (err, hash) => {
-            user.password = hash
-            next()
-        })
-    })
-  } else {
-    next()
-  }
-})
+//   next()
+
+//   // if (user.isModified('password')) {
+
+//   //   bcrypt.genSalt(10, (err, salt) => {
+//   //       bcrypt.hash(user.password, salt, (err, hash) => {
+//   //           user.password = hash
+//   //           next()
+//   //       })
+//   //   })
+//   // } else {
+//   //   next()
+//   // }
+// })
 
 UserSchema.statics.findByEmail = function (email, password) {
 

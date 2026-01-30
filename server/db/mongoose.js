@@ -2,10 +2,9 @@ var mongoose = require('mongoose');
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect('mongodb+srv://qurra:glZtKQkHQ2ljyOJu@cluster0.razm1bi.mongodb.net/?retryWrites=true&w=majority', {
-    useNewUrlParser: true,
-    socketTimeoutMS: 5000,
-    useUnifiedTopology: true
+mongoose.connect('mongodb+srv://kazim_db_user:ffDt6HOiDSBJyNek@cluster0.vppuy6u.mongodb.net/?appName=Cluster0', {
+  serverSelectionTimeoutMS: 30000,
+  socketTimeoutMS: 30000,
 })
 .catch((err) => {
     console.log({err})
