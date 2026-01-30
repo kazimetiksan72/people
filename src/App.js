@@ -162,7 +162,7 @@ const printStyles = `
 function App() {
 
   const reOrdered = () => {
-    const ordered = list.sort((a, b) => parseInt(a.matrikul) < parseInt(b.matrikul))
+    const ordered = list.sort((a, b) => parseInt(a.matrikul) > parseInt(b.matrikul))
     console.log(ordered)
     return ordered
   }
