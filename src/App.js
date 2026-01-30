@@ -4,7 +4,14 @@ import keyNames from './keyNames.json'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {Button} from 'react-bootstrap'
 
+import SpinningCornerImage from './SpinningCornerImage';
+
 const printStyles = `
+
+    .no-print {
+      display: none !important;
+    }
+
 
   .profileName {
     font-size: 22px;
@@ -177,6 +184,7 @@ function App() {
   return (
     <div className="main">
       <style>{printStyles}</style>
+      <SpinningCornerImage src="./olive.png" size={300} speed={0.3} />
       <button
         className="no-print" // Bu sınıf sayesinde PDF'te çıkmayacak
         onClick={handlePrint}
