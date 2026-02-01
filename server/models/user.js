@@ -2,11 +2,18 @@ const mongoose = require('mongoose')
 const _ = require('lodash')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const { type } = require('@testing-library/user-event/dist/type')
 
 const secretWord = 's@me!secret'
 
 const UserSchema = new mongoose.Schema({
   matrikul: {
+    type: String
+  },
+  idaMatrikul: {
+    type: Number
+  },
+  adSoyad: {
     type: String
   },
   tekrisTarihi: {
@@ -184,7 +191,7 @@ UserSchema.methods.toJSON = function () {
 
   const oObject = o.toObject();
 
-  return _.pick(oObject, ['_id', 'name', 'createdAt', 'email']);
+  return _.pick(oObject, ['_id', 'adSoyad', 'ePosta', 'matrikul', 'idaMatrikul', 'tekrisTarihi', 'dogumYeri', 'dogumTarihi', 'kanGrubu', 'meslegi', 'isi', 'medeniHali', 'esininAdi', 'dogumTarihi2', 'cocuklar', 'dogumTarihleri', 'evAdresi', 'isAdresi', 'tlfGsmEvIs', 'ePosta']);
 };
 
 const User = mongoose.model('User', UserSchema);
