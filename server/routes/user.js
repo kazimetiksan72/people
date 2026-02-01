@@ -29,11 +29,13 @@ router.get('/sample', async (req, res) => {
 
 router.post('/signin', async (req, res) => {
 
-    const body = _.pick(req.body, ['email', 'password'])
+    const body = _.pick(req.body, ['ePosta', 'matrikul'])
 
     console.log('sign body', body)
 
-    User.findByEmail(body.email, body.password).then((user) => {
+    User.findByCredentials(body.ePosta, body.matrikul).then((user) => {
+
+        console.log('found route', user)
         return user.generateAuthToken().then((xauth) => {
             res.header('xauth', xauth).send(user)
         })

@@ -167,7 +167,7 @@ const printStyles = `
 function App() {
 
   const reOrdered = () => {
-    const ordered = list.sort((a, b) => parseInt(a.matrikul) > parseInt(b.matrikul))
+    const ordered = list.sort((a, b) => parseInt(a.idaMatrikul) > parseInt(b.idaMatrikul))
     console.log(ordered)
     console.log('sayısı', ordered.length)
     return ordered

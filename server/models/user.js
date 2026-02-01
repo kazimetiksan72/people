@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 const _ = require('lodash')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-const { type } = require('@testing-library/user-event/dist/type')
 
 const secretWord = 's@me!secret'
 
@@ -11,7 +10,7 @@ const UserSchema = new mongoose.Schema({
     type: String
   },
   idaMatrikul: {
-    type: Number
+    type: String
   },
   adSoyad: {
     type: String
@@ -112,14 +111,18 @@ UserSchema.statics.findByCredentials = function (ePosta, matrikul) {
   return User.findOne({ePosta, matrikul})
   .then((user) => {
 
+    console.log('found model', user)
+
     if (!user) {
       return Promise.reject()
     }
 
     return new Promise((resolve, reject) => {
 
-      if (user.matrikul === matrikul) {
-        return resolve()
+    console.log('found model one', user.matrikul, matrikul)
+
+    if (user.matrikul === matrikul) {
+        return resolve(user)
       } else {
         return reject()
       }
