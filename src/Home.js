@@ -15,7 +15,7 @@ const printStyles = `
 
   .profileName {
     font-size: 22px;
-    font-family: "Lato", sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-weight: 900;
     font-style: normal;
     margin-top: 10px;
@@ -57,8 +57,8 @@ const printStyles = `
   @media screen and (max-width: 767px) and (orientation: portrait) {
 
     .profileName {
-      font-size: 16px;
-      font-family: "Lato", sans-serif;
+      font-size: 18px;
+      font-family: "Open Sans", sans-serif;
       font-weight: 900;
       font-style: normal;
       margin-top: 5px;
@@ -160,6 +160,17 @@ const printStyles = `
 `;
 
 const Home = () => {
+
+      const fontStyle = (weight) => {
+    return {
+      fontFamily: "Open Sans",
+      fontOpticalSizing: "auto",
+      fontWeight: weight,
+      fontStyle: "normal"
+    }
+  }
+
+
 
     // const {xauth} = useRedux()
 
@@ -275,13 +286,15 @@ const Home = () => {
                 keys.map(key => {
                   return (
                     <>
-                      <div className='lato-bold' style={{
+                      <div style={{
                         textAlign: 'left',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        ...fontStyle(700)
                       }}>{keyNames[key]}:</div>
-                      <div className='lato-regular' style={{
+                      <div style={{
                         textAlign: 'left',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        ...fontStyle(400)
                       }}>{p[key]}</div>
                   </>
                   )
