@@ -13,11 +13,7 @@ import {
 import SignIn from './SignIn'
 import Home from './Home'
 
-import ReactGA from "react-ga4";
-
 const App = () => {
-
-  ReactGA.initialize("G-XY22F0HGZG");
 
   return (
     <>
