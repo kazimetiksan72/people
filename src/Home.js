@@ -3,8 +3,8 @@ import keys from './keys.json'
 import keyNames from './keyNames.json'
 import {Button} from 'react-bootstrap'
 import SpinningCornerImage from './SpinningCornerImage'
-import { useRedux } from './redux/hooks'
-import { Navigate } from 'react-router-dom'
+// import { useRedux } from './redux/hooks'
+// import { Navigate } from 'react-router-dom'
 
 const printStyles = `
 
