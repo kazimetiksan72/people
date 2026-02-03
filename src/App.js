@@ -12,8 +12,20 @@ import {
 
 import SignIn from './SignIn'
 import Home from './Home'
+import { getMe } from './redux/requests';
+
+
 
 const App = () => {
+
+  const localAuth = sessionStorage.getItem('xauth')
+  console.log({localAuth})
+  if (localAuth !== null) {
+    getMe({
+      callback: () => {},
+      localAuth
+    })
+  }
 
   return (
     <>

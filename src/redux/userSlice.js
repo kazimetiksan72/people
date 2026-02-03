@@ -63,33 +63,33 @@ export const getMe = createAsyncThunk('getMe', async (info, { getState, dispatch
         )
     )
 
-    const url = '/api/user/me'
-    axios.get(url, {
-        headers: {
-            xauth: localAuth
-        }
-    })
-    .then((response) => {
-        console.log('thunk get all', response.data)
+    // const url = '/api/user/me'
+    // axios.get(url, {
+    //     headers: {
+    //         xauth: localAuth
+    //     }
+    // })
+    // .then((response) => {
+    //     console.log('thunk get all', response.data)
 
-        dispatch(
-            setProfile(
-                response.data.profile
-            )
-        )
+    //     dispatch(
+    //         setProfile(
+    //             response.data.profile
+    //         )
+    //     )
 
-        dispatch(
-            setCodes(
-                response.data.codes
-            )
-        )
+    //     dispatch(
+    //         setCodes(
+    //             response.data.codes
+    //         )
+    //     )
 
-        callback(true)
-    })
-    .catch((err) => {
-        console.log('error', err)
-        callback(false)
-    })
+    //     callback(true)
+    // })
+    // .catch((err) => {
+    //     console.log('error', err)
+    //     callback(false)
+    // })
 })
 
 export const signIn = createAsyncThunk('signIn', async (info, { getState, dispatch }) => {
