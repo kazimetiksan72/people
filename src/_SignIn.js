@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -7,12 +7,11 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import InputLabel from "@mui/material/InputLabel";
 import InputAdornment from "@mui/material/InputAdornment";
 import FormControl from "@mui/material/FormControl";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 
 import { useNavigate } from "react-router-dom";
 import { signIn } from "./redux/requests";
@@ -23,105 +22,78 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const year = useMemo(() => new Date().getFullYear(), []);
-
-  const handleEmailChange = (e) => {
-    // Emaili her zaman küçük harfe çevir
-    const v = (e.target.value || "").toLowerCase();
-    setUserInfo((p) => ({ ...p, email: v }));
-  };
-
-  const handlePasswordChange = (e) => {
-    setUserInfo((p) => ({ ...p, password: e.target.value }));
-  };
-
-  const handleSubmit = () => {
-    setLoading(true);
-    signIn({
-      ...userInfo,
-      callback: (ok) => {
-        setLoading(false);
-        if (ok) navigate("/");
-      },
-    });
-  };
 
   return (
-    <Box
-      sx={{
+    <div
+      style={{
         minHeight: "100vh",
         display: "grid",
         placeItems: "center",
-        bgcolor: "#fff",
-        px: { xs: 2, sm: 3 },
-        py: { xs: 3, sm: 4 },
+        background: "#ffffff",
+        padding: 24,
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 420 }}>
+      <div style={{ width: 420, maxWidth: "100%" }}>
         {/* ÜST KONSEPT */}
-        <Box sx={{ textAlign: "center", mb: 2 }}>
-          <Box
-            sx={{
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <div
+            style={{
               width: 84,
               height: 44,
-              mx: "auto",
-              borderRadius: 2,
+              margin: "0 auto",
+              borderRadius: 12,
               display: "grid",
               placeItems: "center",
               border: "1px solid #E5E7EB",
               color: "#C8A24A",
               fontWeight: 700,
               letterSpacing: "0.22em",
-              pl: "0.22em",
+              paddingLeft: "0.22em",
               userSelect: "none",
-              fontSize: 24,
+              fontSize: 24
             }}
           >
             İDA
-          </Box>
+          </div>
 
-          <Box
-            sx={{
+          <div
+            style={{
               width: 120,
               height: 1,
-              mx: "auto",
-              mt: 1.5,
+              margin: "12px auto 0",
               background:
                 "linear-gradient(90deg, transparent, #C8A24A, transparent)",
             }}
           />
-        </Box>
+        </div>
 
         {/* FORM KARTI */}
         <Paper
           elevation={0}
-          sx={{
-            borderRadius: 2,
+          style={{
+            borderRadius: 16,
             border: "1px solid #E5E7EB",
-            bgcolor: "#fff",
-            p: { xs: 2, sm: 3 },
+            padding: 24,
+            background: "#ffffff",
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 600, color: "#111827" }}>
+          <Typography
+            variant="h6"
+            style={{ fontWeight: 600, color: "#111827" }}
+          >
             Giriş
           </Typography>
 
-          <Box sx={{ display: "grid", gap: 1.75, mt: 2.5 }}>
+
+          <div style={{ display: "grid", gap: 14, marginTop: 22 }}>
             <TextField
-              label="E-posta"
+              label="Kullanıcı Adı"
               variant="outlined"
               fullWidth
               value={userInfo.email}
-              onChange={handleEmailChange}
-              autoComplete="email"
-              // Mobil klavyede @ görünmesi için:
-              type="email"
-              inputProps={{
-                inputMode: "email",
-                autoCapitalize: "none", // iOS/Android otomatik büyük harfi kapatır
-                autoCorrect: "off",
-                spellCheck: "false",
-              }}
+              onChange={(e) =>
+                setUserInfo({ ...userInfo, email: e.target.value })
+              }
             />
 
             <FormControl variant="outlined" fullWidth>
@@ -129,14 +101,14 @@ const SignIn = () => {
               <OutlinedInput
                 type={showPassword ? "text" : "password"}
                 value={userInfo.password}
-                onChange={handlePasswordChange}
-                autoComplete="current-password"
+                onChange={(e) =>
+                  setUserInfo({ ...userInfo, password: e.target.value })
+                }
                 endAdornment={
                   <InputAdornment position="end">
                     <IconButton
-                      onClick={() => setShowPassword((s) => !s)}
+                      onClick={() => setShowPassword(!showPassword)}
                       edge="end"
-                      aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
                     >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
@@ -150,26 +122,41 @@ const SignIn = () => {
               size="large"
               variant="contained"
               disabled={loading}
-              onClick={handleSubmit}
-              sx={{
-                mt: 0.75,
-                borderRadius: 1.25,
-                py: 1.5,
+              onClick={() => {
+                setLoading(true);
+                signIn({
+                  ...userInfo,
+                  callback: (ok) => {
+                    setLoading(false);
+                    if (ok) navigate("/");
+                  },
+                });
+              }}
+              style={{
+                marginTop: 6,
+                borderRadius: 10,
+                padding: "12px 14px",
                 fontWeight: 700,
-                bgcolor: "#111827",
-                "&:hover": { bgcolor: "#0b1220" },
+                background: "#111827",
               }}
             >
               {loading ? "GİRİŞ YAPILIYOR..." : "GİRİŞ YAP"}
             </Button>
 
-            <Box sx={{ mt: 0.75, textAlign: "center", fontSize: 12, color: "#9CA3AF" }}>
-              © {year} Ayvalık İDA Muhterem Locası
-            </Box>
-          </Box>
+            <div
+              style={{
+                marginTop: 6,
+                textAlign: "center",
+                fontSize: 12,
+                color: "#9CA3AF",
+              }}
+            >
+              © {new Date().getFullYear()} Ayvalık İDA Muhterem Locası
+            </div>
+          </div>
         </Paper>
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 
