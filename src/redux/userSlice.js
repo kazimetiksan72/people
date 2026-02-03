@@ -53,7 +53,7 @@ export const getMe = createAsyncThunk('getMe', async (info, { getState, dispatch
     console.log('thunk params', info)
 
     const {
-        callback,
+        //callback,
         localAuth
     } = info
 
