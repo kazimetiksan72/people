@@ -19,7 +19,8 @@ const printStyles = `
     font-weight: 900;
     font-style: normal;
     margin-top: 10px;
-    margin-bottom: 10px
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
   }
 
   .main {
@@ -40,6 +41,8 @@ const printStyles = `
     max-width: 200px;
     max-height: 300px;
     border: 1px solid #000000;
+    padding: 4px;
+    background: #fff;
   }
 
   body, html {
@@ -54,7 +57,19 @@ const printStyles = `
       background-attachment: fixed;  /* scroll ile hareket etmez */
     }
 
+    .spinning-corner {
+  height: 240px;
+}
+
   @media screen and (max-width: 767px) and (orientation: portrait) {
+
+  .spinning-corner {
+    height: 130px;
+  }
+
+  .full-page-item {
+    padding: 16px !important;
+  }
 
     .profileName {
       font-size: 18px;
@@ -203,7 +218,11 @@ const Home = () => {
   return (
     <div className="main">
       <style>{printStyles}</style>
-      <SpinningCornerImage src="./olive.png" size={200} speed={0.1} />
+      <SpinningCornerImage 
+        src="./olive.png" 
+        size={200} 
+        speed={0.1} 
+      />
       <button
         className="no-print" // Bu sınıf sayesinde PDF'te çıkmayacak
         onClick={handlePrint}
@@ -292,7 +311,8 @@ const Home = () => {
                       }}>{keyNames[key]}:</div>
                       <div style={{
                         textAlign: 'left',
-                        whiteSpace: 'nowrap',
+                         whiteSpace: 'normal',
+                        lineHeight: '1.4',
                         ...fontStyle(400)
                       }}>{p[key]}</div>
                   </>

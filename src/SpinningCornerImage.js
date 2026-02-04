@@ -55,11 +55,11 @@ export default function SpinningCornerImage({
       ref={imgRef}
       src={src}
       alt={alt}
+      className="spinning-corner"
       style={{
         position: "fixed",
         top: offset,
         right: offset,
-        height: size,
         zIndex: 9999,
         pointerEvents: "none",
         transformStyle: "preserve-3d",
