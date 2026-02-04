@@ -282,7 +282,7 @@ const Home = () => {
               <div style={{marginTop: 20}}>
                 <Button variant='success' style={{width: 150}} onClick={(e) => {
                       e.preventDefault()
-                      window.location.href = "https://wa.me/90"+p["tlfGsmEvIs"]
+                      window.location.href = "https://wa.me/"+(p.matrikul === "39285" ? "1" : "90")+p.tlfGsmEvIs
                 }}>Whatsapp Yaz</Button>
               </div>
               <div style={{marginTop: 20}}>
