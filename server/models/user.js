@@ -3,7 +3,7 @@ const _ = require('lodash')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
-const secretWord = 's@me!secret'
+const secretWord = process.env.JWT_SECRET
 
 const UserSchema = new mongoose.Schema({
   matrikul: {
