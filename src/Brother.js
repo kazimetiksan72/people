@@ -39,6 +39,8 @@ import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded'
 import FamilyRestroomRoundedIcon from '@mui/icons-material/FamilyRestroomRounded'
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
+import AddRoundedIcon from '@mui/icons-material/AddRounded'
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
 
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useRedux } from './redux/hooks'
@@ -173,6 +175,33 @@ const normalizeMedeniHali = (value) => {
   return ''
 }
 
+const getChildrenFromUser = (user) => {
+  if (Array.isArray(user?.cocukBilgileri) && user.cocukBilgileri.length > 0) {
+    return user.cocukBilgileri.map((child) => ({
+      ad: String(child?.ad || ''),
+      dogumTarihi: parseDateForInput(child?.dogumTarihi || '').dateValue
+    }))
+  }
+
+  const names = String(user?.cocuklar || '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean)
+
+  const birthDates = String(user?.dogumTarihleri || '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean)
+
+  const maxLen = Math.max(names.length, birthDates.length)
+  if (maxLen === 0) return [{ ad: '', dogumTarihi: '' }]
+
+  return Array.from({ length: maxLen }, (_, index) => ({
+    ad: names[index] || '',
+    dogumTarihi: parseDateForInput(birthDates[index] || '').dateValue
+  }))
+}
+
 function InfoRow({ icon, label, value, link }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.2, py: 0.85 }}>
@@ -252,7 +281,8 @@ export default function Brother() {
     medeniHali: '',
     esininAdi: '',
     dogumTarihi2: '',
-    evAdresi: ''
+    evAdresi: '',
+    cocukBilgileri: [{ ad: '', dogumTarihi: '' }]
   })
 
   useEffect(() => {
@@ -327,9 +357,36 @@ export default function Brother() {
       medeniHali: normalizeMedeniHali(user.medeniHali),
       esininAdi: user.esininAdi || '',
       dogumTarihi2: parsedEsDogumTarihi.dateValue,
-      evAdresi: user.evAdresi || ''
+      evAdresi: user.evAdresi || '',
+      cocukBilgileri: getChildrenFromUser(user)
     })
     setIsEditOpen(true)
+  }
+
+  const updateChildField = (index, key, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      cocukBilgileri: prev.cocukBilgileri.map((child, i) => (
+        i === index ? { ...child, [key]: value } : child
+      ))
+    }))
+  }
+
+  const addChildRow = () => {
+    setFormData((prev) => ({
+      ...prev,
+      cocukBilgileri: [...prev.cocukBilgileri, { ad: '', dogumTarihi: '' }]
+    }))
+  }
+
+  const removeChildRow = (index) => {
+    setFormData((prev) => {
+      const next = prev.cocukBilgileri.filter((_, i) => i !== index)
+      return {
+        ...prev,
+        cocukBilgileri: next.length > 0 ? next : [{ ad: '', dogumTarihi: '' }]
+      }
+    })
   }
 
   const onSaveProfile = () => {
@@ -341,7 +398,13 @@ export default function Brother() {
       payload: {
         ...formData,
         dogumTarihi: formData.dogumTarihi || rawDateHints.dogumTarihi || '',
-        dogumTarihi2: formData.dogumTarihi2 || rawDateHints.dogumTarihi2 || ''
+        dogumTarihi2: formData.dogumTarihi2 || rawDateHints.dogumTarihi2 || '',
+        cocukBilgileri: formData.cocukBilgileri
+          .map((child) => ({
+            ad: String(child?.ad || '').trim(),
+            dogumTarihi: String(child?.dogumTarihi || '').trim()
+          }))
+          .filter((child) => child.ad || child.dogumTarihi)
       },
       callback: (ok) => {
         setIsSaving(false)
@@ -705,6 +768,47 @@ export default function Brother() {
               InputLabelProps={{ shrink: true }}
               helperText={rawDateHints.dogumTarihi2 ? `Mevcut kayıt: ${rawDateHints.dogumTarihi2}` : ''}
             />
+            <Box sx={{ border: '1px solid rgba(22,34,54,0.12)', borderRadius: 2, p: 1.2 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 800, fontSize: 14 }}>
+                  Çocuk Bilgileri
+                </Typography>
+                <Button
+                  startIcon={<AddRoundedIcon />}
+                  onClick={addChildRow}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Çocuk Ekle
+                </Button>
+              </Stack>
+              <Stack spacing={1}>
+                {formData.cocukBilgileri.map((child, index) => (
+                  <Box key={`child-${index}`} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr auto' }, gap: 1 }}>
+                    <TextField
+                      label="Çocuk Adı"
+                      value={child.ad}
+                      onChange={(e) => updateChildField(index, 'ad', e.target.value)}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Doğum Tarihi"
+                      type="date"
+                      value={child.dogumTarihi}
+                      onChange={(e) => updateChildField(index, 'dogumTarihi', e.target.value)}
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                    />
+                    <Button
+                      color="error"
+                      onClick={() => removeChildRow(index)}
+                      sx={{ textTransform: 'none', minWidth: 44 }}
+                    >
+                      <DeleteOutlineRoundedIcon fontSize="small" />
+                    </Button>
+                  </Box>
+                ))}
+              </Stack>
+            </Box>
             <TextField label="Ev Adresi" value={formData.evAdresi} onChange={(e) => setFormData((p) => ({ ...p, evAdresi: e.target.value }))} fullWidth multiline minRows={2} />
           </Stack>
         </DialogContent>

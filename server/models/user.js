@@ -49,6 +49,14 @@ const UserSchema = new mongoose.Schema({
   cocuklar: {
     type: String
   },
+  cocukBilgileri: [{
+    ad: {
+      type: String
+    },
+    dogumTarihi: {
+      type: String
+    }
+  }],
   dogumTarihleri: {
     type: String
   },
@@ -209,7 +217,7 @@ UserSchema.methods.toJSON = function () {
 
   const oObject = o.toObject();
 
-  return _.pick(oObject, ['_id', 'adSoyad', 'ePosta', 'matrikul', 'idaMatrikul', 'tekrisTarihi', 'dogumYeri', 'dogumTarihi', 'kanGrubu', 'meslegi', 'isi', 'medeniHali', 'esininAdi', 'dogumTarihi2', 'cocuklar', 'dogumTarihleri', 'evAdresi', 'isAdresi', 'tlfGsmEvIs', 'ePosta', 'role']);
+  return _.pick(oObject, ['_id', 'adSoyad', 'ePosta', 'matrikul', 'idaMatrikul', 'tekrisTarihi', 'dogumYeri', 'dogumTarihi', 'kanGrubu', 'meslegi', 'isi', 'medeniHali', 'esininAdi', 'dogumTarihi2', 'cocuklar', 'cocukBilgileri', 'dogumTarihleri', 'evAdresi', 'isAdresi', 'tlfGsmEvIs', 'ePosta', 'role']);
 };
 
 const User = mongoose.model('User', UserSchema);

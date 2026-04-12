@@ -135,11 +135,27 @@ router.patch('/user/:_id', authenticate, async (req, res) => {
         'isi',
         'medeniHali',
         'esininAdi',
-        'dogumTarihi2'
+        'dogumTarihi2',
+        'cocuklar',
+        'dogumTarihleri',
+        'cocukBilgileri'
     ])
     const update = {
         ...body,
         adSoyad: body.adSoyad || body.name
+    }
+
+    if (Array.isArray(body.cocukBilgileri)) {
+        const normalizedChildren = body.cocukBilgileri
+            .map((child) => ({
+                ad: String(child?.ad || '').trim(),
+                dogumTarihi: String(child?.dogumTarihi || '').trim()
+            }))
+            .filter((child) => child.ad || child.dogumTarihi)
+
+        update.cocukBilgileri = normalizedChildren
+        update.cocuklar = normalizedChildren.map((child) => child.ad).filter(Boolean).join(', ')
+        update.dogumTarihleri = normalizedChildren.map((child) => child.dogumTarihi).filter(Boolean).join(', ')
     }
 
     const obj = await User.findOneAndUpdate({
