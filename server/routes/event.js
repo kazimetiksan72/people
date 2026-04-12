@@ -129,6 +129,10 @@ router.get('/events/:id', authenticate, async (req, res) => {
 })
 
 router.post('/events', authenticate, async (req, res) => {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).send({ errorMessage: 'Etkinlik oluşturma yetkisi sadece admin kullanıcıdadır.' })
+  }
+
   const body = _.pick(req.body, [
     'name',
     'location',

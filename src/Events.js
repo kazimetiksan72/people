@@ -44,7 +44,8 @@ const getTodayDateString = () => {
 
 const Events = () => {
   const navigate = useNavigate()
-  const { xauth } = useRedux()
+  const { xauth, profile } = useRedux()
+  const isAdmin = profile?.role === 'admin'
   const [menuOpen, setMenuOpen] = useState(false)
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
@@ -287,6 +288,11 @@ const Events = () => {
   }
 
   const onSaveEvent = () => {
+    if (!isAdmin) {
+      setFormError('Etkinlik oluşturma yetkisi sadece admin kullanıcıdadır.')
+      return
+    }
+
     if (!eventName.trim() || !locationInput.trim()) {
       setFormError('Etkinlik Adı ve Etkinlik Konumu zorunludur.')
       return
@@ -362,21 +368,23 @@ const Events = () => {
             </Typography>
           </Stack>
 
-          <Button
-            variant="contained"
-            startIcon={<AddRoundedIcon />}
-            onClick={() => setIsCreateOpen(true)}
-            sx={{
-              ...fontStyle(800),
-              textTransform: 'none',
-              borderRadius: 2,
-              px: 2.2,
-              backgroundColor: '#15803d',
-              '&:hover': { backgroundColor: '#166534' }
-            }}
-          >
-            Yeni Ekle
-          </Button>
+          {isAdmin ? (
+            <Button
+              variant="contained"
+              startIcon={<AddRoundedIcon />}
+              onClick={() => setIsCreateOpen(true)}
+              sx={{
+                ...fontStyle(800),
+                textTransform: 'none',
+                borderRadius: 2,
+                px: 2.2,
+                backgroundColor: '#15803d',
+                '&:hover': { backgroundColor: '#166534' }
+              }}
+            >
+              Yeni Ekle
+            </Button>
+          ) : null}
         </Stack>
       </Paper>
 

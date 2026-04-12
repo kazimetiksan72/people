@@ -54,6 +54,7 @@ router.post('/signup', async (req, res) => {
         ePosta: body.email || body.ePosta,
         matrikul: body.password || body.matrikul,
         sifre: body.password || body.matrikul,
+        role: 'user',
         adSoyad: body.name || body.adSoyad
     })
 
@@ -112,6 +113,12 @@ router.delete('/user/:_id', authenticate, async (req, res) => {
 });
 
 router.patch('/user/:_id', authenticate, async (req, res) => {
+
+    const isAdmin = req.user?.role === 'admin'
+    const isSelf = String(req.user?._id) === String(req.params._id)
+    if (!isAdmin && !isSelf) {
+        return res.status(403).send({ errorMessage: 'Bu işlem için yetkiniz yok.' })
+    }
 
     const body = _.pick(req.body, [
         'name',

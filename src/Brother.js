@@ -303,7 +303,9 @@ export default function Brother() {
   const waNumber = getWhatsAppNumber(user.tlfGsmEvIs)
   const waLink = waNumber ? `https://wa.me/${waNumber}` : ''
   const avatarSrc = `/images/${safeText(user.matrikul)}.jpg`
+  const isAdmin = profile?.role === 'admin'
   const isOwnProfile = Boolean(profile?.matrikul) && String(profile.matrikul) === String(user.matrikul)
+  const canEditProfile = isAdmin || isOwnProfile
 
   const openEditDialog = () => {
     setFormError('')
@@ -564,7 +566,7 @@ export default function Brother() {
                   ))}
                 </Box>
 
-                {isOwnProfile ? (
+                {canEditProfile ? (
                   <Button
                     className="no-print"
                     fullWidth
