@@ -378,62 +378,48 @@ const EventDetail = () => {
         </Paper>
       ) : (
         <Stack spacing={1.2}>
-          <Paper variant="outlined" sx={{ p: 1.6, borderRadius: 2 }}>
-            <Typography sx={{ ...fontStyle(900), fontSize: { xs: 20, sm: 24 }, lineHeight: 1.15 }}>
-              {event.name}
-            </Typography>
-            <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mt: 0.5 }}>
-              <LocationOnRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-              <Typography sx={{ ...fontStyle(600), wordBreak: 'break-word' }}>{event.location}</Typography>
-            </Stack>
-            <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mt: 0.5 }}>
-              <AccessTimeRoundedIcon sx={{ fontSize: 17, color: 'text.secondary' }} />
-              <Typography sx={{ ...fontStyle(600), fontSize: 13, color: 'text.secondary' }}>
-                {formatDateTrLong(event.date)} {event.time ? `· ${event.time}` : ''}
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1 }}>
+            <Paper variant="outlined" sx={{ p: 1.6, borderRadius: 2 }}>
+              <Typography sx={{ ...fontStyle(900), fontSize: { xs: 20, sm: 24 }, lineHeight: 1.15 }}>
+                {event.name}
               </Typography>
-            </Stack>
-            {event.note ? (
-              <Typography sx={{ ...fontStyle(600), fontSize: 14, mt: '30px' }}>
-                {event.note}
-              </Typography>
-            ) : null}
-          </Paper>
+              <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mt: 0.5 }}>
+                <LocationOnRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                <Typography sx={{ ...fontStyle(600), wordBreak: 'break-word' }}>{event.location}</Typography>
+              </Stack>
+              <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mt: 0.5 }}>
+                <AccessTimeRoundedIcon sx={{ fontSize: 17, color: 'text.secondary' }} />
+                <Typography sx={{ ...fontStyle(600), fontSize: 13, color: 'text.secondary' }}>
+                  {formatDateTrLong(event.date)} {event.time ? `· ${event.time}` : ''}
+                </Typography>
+              </Stack>
+              {event.note ? (
+                <Typography sx={{ ...fontStyle(600), fontSize: 14, mt: '30px' }}>
+                  {event.note}
+                </Typography>
+              ) : null}
+            </Paper>
 
-          {!isMobile ? (
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 1 }}>
-              <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 2, minHeight: { xs: 190, sm: 220 } }}>
-                {event.mapEmbedUrl ? (
-                  <iframe
-                    title="Google Map"
-                    src={event.mapEmbedUrl}
-                    width="100%"
-                    height={isMobile ? '190' : '220'}
-                    style={{ border: 0, display: 'block' }}
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                ) : (
-                  <Box sx={{ p: 1.2 }}>
-                    <Typography sx={{ ...fontStyle(700), fontSize: 13, color: 'text.secondary' }}>
-                      Harita bilgisi yok.
-                    </Typography>
-                  </Box>
-                )}
-              </Paper>
-
-              <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 2, minHeight: { xs: 190, sm: 220 } }}>
-                {event.photoUrl ? (
-                  <Box component="img" src={event.photoUrl} alt={event.name} sx={{ width: '100%', height: { xs: 190, sm: 220 }, objectFit: 'cover', display: 'block' }} />
-                ) : (
-                  <Box sx={{ p: 1.2 }}>
-                    <Typography sx={{ ...fontStyle(700), fontSize: 13, color: 'text.secondary' }}>
-                      Mekan görseli yok.
-                    </Typography>
-                  </Box>
-                )}
-              </Paper>
-            </Box>
-          ) : null}
+            <Paper variant="outlined" sx={{ overflow: 'hidden', borderRadius: 2, minHeight: { xs: 190, sm: 220 } }}>
+              {event.mapEmbedUrl ? (
+                <iframe
+                  title="Google Map"
+                  src={event.mapEmbedUrl}
+                  width="100%"
+                  height={isMobile ? '190' : '220'}
+                  style={{ border: 0, display: 'block' }}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              ) : (
+                <Box sx={{ p: 1.2 }}>
+                  <Typography sx={{ ...fontStyle(700), fontSize: 13, color: 'text.secondary' }}>
+                    Harita bilgisi yok.
+                  </Typography>
+                </Box>
+              )}
+            </Paper>
+          </Box>
 
           {joinError ? (
             <Typography sx={{ ...fontStyle(700), color: 'error.main', fontSize: 13 }}>

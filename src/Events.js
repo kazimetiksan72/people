@@ -1,5 +1,5 @@
 import { Navigate, useNavigate } from 'react-router-dom'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRedux } from './redux/hooks'
 import { signOut } from './redux/requests'
 import axios from 'axios'
@@ -24,6 +24,8 @@ import {
   Paper,
   Stack,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography
 } from '@mui/material'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
@@ -40,6 +42,38 @@ const getTodayDateString = () => {
   const m = String(now.getMonth() + 1).padStart(2, '0')
   const d = String(now.getDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
+}
+
+const parseEventDateTime = (event) => {
+  if (!event?.date) return null
+
+  const datePart = String(event.date).trim()
+  const timePart = String(event.time || '').trim()
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+    const safeTime = /^\d{2}:\d{2}$/.test(timePart) ? `${timePart}:00` : '23:59:59'
+    const parsed = new Date(`${datePart}T${safeTime}`)
+    return Number.isNaN(parsed.getTime()) ? null : parsed
+  }
+
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(datePart)) {
+    const [d, m, y] = datePart.split('.')
+    const safeTime = /^\d{2}:\d{2}$/.test(timePart) ? `${timePart}:00` : '23:59:59'
+    const parsed = new Date(`${y}-${m}-${d}T${safeTime}`)
+    return Number.isNaN(parsed.getTime()) ? null : parsed
+  }
+
+  const fallback = new Date(datePart)
+  if (Number.isNaN(fallback.getTime())) return null
+
+  if (!timePart || !/^\d{2}:\d{2}$/.test(timePart)) {
+    fallback.setHours(23, 59, 59, 999)
+    return fallback
+  }
+
+  const [hh, mm] = timePart.split(':').map((v) => Number(v))
+  fallback.setHours(hh, mm, 0, 0)
+  return fallback
 }
 
 const Events = () => {
@@ -61,6 +95,7 @@ const Events = () => {
   const [isEventsLoading, setIsEventsLoading] = useState(false)
   const [selectedPlacePreview, setSelectedPlacePreview] = useState(null)
   const [isPreviewLoading, setIsPreviewLoading] = useState(false)
+  const [eventSelector, setEventSelector] = useState('active')
   const [formError, setFormError] = useState('')
   const [googleWarning, setGoogleWarning] = useState('')
 
@@ -209,6 +244,18 @@ const Events = () => {
     if (!xauth) return
     fetchEvents()
   }, [xauth, fetchEvents])
+
+  const filteredEvents = useMemo(() => {
+    const now = new Date()
+    return savedEvents.filter((event) => {
+      const eventDateTime = parseEventDateTime(event)
+      if (!eventDateTime) {
+        return eventSelector === 'active'
+      }
+      const isPast = eventDateTime.getTime() < now.getTime()
+      return eventSelector === 'past' ? isPast : !isPast
+    })
+  }, [savedEvents, eventSelector])
 
   if (!xauth) {
     return <Navigate to="/signin" replace />
@@ -452,20 +499,52 @@ const Events = () => {
       </Drawer>
 
       <Box sx={{ mt: 2.2, display: 'grid', gap: 1.2 }}>
+        <Box>
+          <ToggleButtonGroup
+            value={eventSelector}
+            exclusive
+            onChange={(_, value) => {
+              if (!value) return
+              setEventSelector(value)
+            }}
+            fullWidth
+            sx={{
+              '& .MuiToggleButton-root': {
+                ...fontStyle(800),
+                textTransform: 'none',
+                borderRadius: '10px !important',
+                py: 1,
+                '&.Mui-selected': {
+                  backgroundColor: '#1976d2',
+                  color: '#fff'
+                },
+                '&.Mui-selected:hover': {
+                  backgroundColor: '#1565c0'
+                }
+              }
+            }}
+          >
+            <ToggleButton value="active">Aktif Etkinlikler</ToggleButton>
+            <ToggleButton value="past">Geçmiş Etkinlikler</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+
         {isEventsLoading ? (
           <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
             <Typography sx={{ ...fontStyle(700), fontSize: 15, color: 'text.secondary' }}>
               Etkinlikler yükleniyor...
             </Typography>
           </Paper>
-        ) : savedEvents.length === 0 ? (
+        ) : filteredEvents.length === 0 ? (
           <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
             <Typography sx={{ ...fontStyle(700), fontSize: 15, color: 'text.secondary' }}>
-              Henüz kaydedilmiş etkinlik yok.
+              {eventSelector === 'past'
+                ? 'Henüz geçmiş etkinlik yok.'
+                : 'Henüz aktif etkinlik yok.'}
             </Typography>
           </Paper>
         ) : (
-          savedEvents.map((event) => (
+          filteredEvents.map((event) => (
             <Paper
               key={event._id || event.id}
               variant="outlined"
