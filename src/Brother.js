@@ -202,6 +202,26 @@ const getChildrenFromUser = (user) => {
   }))
 }
 
+const getChildrenDisplayText = (user) => {
+  const children = getChildrenFromUser(user)
+    .map((child) => ({
+      ad: String(child?.ad || '').trim(),
+      dogumTarihi: String(child?.dogumTarihi || '').trim()
+    }))
+    .filter((child) => child.ad || child.dogumTarihi)
+
+  if (children.length === 0) {
+    return ''
+  }
+
+  return children.map((child) => {
+    const formattedDate = formatLongDateTr(child.dogumTarihi)
+    if (!child.ad) return formattedDate
+    if (!formattedDate) return child.ad
+    return `${child.ad} - ${formattedDate}`
+  }).join(', ')
+}
+
 function InfoRow({ icon, label, value, link }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.2, py: 0.85 }}>
@@ -336,6 +356,7 @@ export default function Brother() {
   const isAdmin = profile?.role === 'admin'
   const isOwnProfile = Boolean(profile?.matrikul) && String(profile.matrikul) === String(user.matrikul)
   const canEditProfile = isAdmin || isOwnProfile
+  const childrenDisplayText = getChildrenDisplayText(user)
 
   const openEditDialog = () => {
     setFormError('')
@@ -450,8 +471,7 @@ export default function Brother() {
         { label: 'Medeni Hali', value: user.medeniHali, icon: <FamilyRestroomRoundedIcon fontSize="small" /> },
         { label: 'Eşinin Adı', value: user.esininAdi, icon: <FamilyRestroomRoundedIcon fontSize="small" /> },
         { label: 'Eşinin Doğum Tarihi', value: formatLongDateTr(user.dogumTarihi2), icon: <EventRoundedIcon fontSize="small" /> },
-        { label: 'Çocuklar', value: user.cocuklar, icon: <FamilyRestroomRoundedIcon fontSize="small" /> },
-        { label: 'Çocukların Doğum Tarihleri', value: user.dogumTarihleri, icon: <EventRoundedIcon fontSize="small" /> }
+        { label: 'Çocuklar', value: childrenDisplayText, icon: <FamilyRestroomRoundedIcon fontSize="small" /> }
       ]
     },
     {
@@ -577,7 +597,7 @@ export default function Brother() {
                   />
                   {user.tekrisTarihi ? (
                     <Chip
-                      label={`Tekris ${safeText(user.tekrisTarihi)}`}
+                      label={`Tekris ${formatLongDateTr(user.tekrisTarihi)}`}
                       icon={<EventRoundedIcon />}
                       sx={{ fontFamily: 'Open Sans', fontWeight: 800, animation: `${chipEnter} 360ms ease both`, animationDelay: '220ms' }}
                     />
