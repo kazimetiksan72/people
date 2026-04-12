@@ -10,6 +10,7 @@ import FormControl from "@mui/material/FormControl";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import Alert from "@mui/material/Alert";
 
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -21,6 +22,7 @@ const SignIn = () => {
   const [userInfo, setUserInfo] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
   const year = useMemo(() => new Date().getFullYear(), []);
@@ -29,19 +31,26 @@ const SignIn = () => {
     // Emaili her zaman küçük harfe çevir
     const v = (e.target.value || "").toLowerCase();
     setUserInfo((p) => ({ ...p, email: v }));
+    setErrorMessage("");
   };
 
   const handlePasswordChange = (e) => {
     setUserInfo((p) => ({ ...p, password: e.target.value }));
+    setErrorMessage("");
   };
 
   const handleSubmit = () => {
+    setErrorMessage("");
     setLoading(true);
     signIn({
       ...userInfo,
       callback: (ok) => {
         setLoading(false);
-        if (ok) navigate("/");
+        if (ok) {
+          navigate("/");
+        } else {
+          setErrorMessage("E-posta veya şifre hatalı.");
+        }
       },
     });
   };
@@ -107,6 +116,12 @@ const SignIn = () => {
           </Typography>
 
           <Box sx={{ display: "grid", gap: 1.75, mt: 2.5 }}>
+            {errorMessage && (
+              <Alert severity="error" sx={{ borderRadius: 1.25 }}>
+                {errorMessage}
+              </Alert>
+            )}
+
             <TextField
               label="E-posta"
               variant="outlined"

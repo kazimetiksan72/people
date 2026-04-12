@@ -29,11 +29,13 @@ router.get('/sample', async (req, res) => {
 
 router.post('/signin', async (req, res) => {
 
-    const body = _.pick(req.body, ['email', 'password'])
+    const body = _.pick(req.body, ['email', 'password', 'ePosta', 'matrikul'])
+    const email = body.email || body.ePosta
+    const password = body.password || body.matrikul
 
     console.log('sign body', body)
 
-    User.findByCredentials(body.email, body.password).then((user) => {
+    User.findByCredentials(email, password).then((user) => {
 
         console.log('found route', user)
         return user.generateAuthToken().then((xauth) => {
@@ -46,10 +48,13 @@ router.post('/signin', async (req, res) => {
 
 router.post('/signup', async (req, res) => {
 
-    const body = _.pick(req.body, ['email', 'password', 'name'])
+    const body = _.pick(req.body, ['email', 'password', 'name', 'ePosta', 'matrikul', 'adSoyad'])
 
     const obj = new User({
-        ...body,
+        ePosta: body.email || body.ePosta,
+        matrikul: body.password || body.matrikul,
+        sifre: body.password || body.matrikul,
+        adSoyad: body.name || body.adSoyad
     })
 
     obj.save()
@@ -72,7 +77,33 @@ router.post('/signup', async (req, res) => {
         })
 })
 
-router.delete('/user/:_id', async (req, res) => {
+router.post('/user/me/change-password', authenticate, async (req, res) => {
+
+    const body = _.pick(req.body, ['currentPassword', 'newPassword'])
+    const currentPassword = String(body.currentPassword || '')
+    const newPassword = String(body.newPassword || '')
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).send({ errorMessage: 'Mevcut şifre ve yeni şifre zorunludur.' })
+    }
+
+    if (newPassword.length < 4) {
+        return res.status(400).send({ errorMessage: 'Yeni şifre en az 4 karakter olmalıdır.' })
+    }
+
+    const expectedPassword = req.user.sifre || req.user.matrikul
+    if (expectedPassword !== currentPassword) {
+        return res.status(400).send({ errorMessage: 'Mevcut şifre hatalı.' })
+    }
+
+    req.user.sifre = newPassword
+    req.user.updatedAt = new Date()
+    await req.user.save()
+
+    res.send({ success: true })
+})
+
+router.delete('/user/:_id', authenticate, async (req, res) => {
 
     await User.findOneAndRemove({
         _id: req.params._id
@@ -80,14 +111,34 @@ router.delete('/user/:_id', async (req, res) => {
     res.sendStatus(200)
 });
 
-router.patch('/user/:_id', async (req, res) => {
+router.patch('/user/:_id', authenticate, async (req, res) => {
 
-    const body = _.pick(req.body, ['name'])
+    const body = _.pick(req.body, [
+        'name',
+        'adSoyad',
+        'ePosta',
+        'matrikul',
+        'tlfGsmEvIs',
+        'evAdresi',
+        'isAdresi',
+        'dogumTarihi',
+        'dogumYeri',
+        'kanGrubu',
+        'meslegi',
+        'isi',
+        'medeniHali',
+        'esininAdi',
+        'dogumTarihi2'
+    ])
+    const update = {
+        ...body,
+        adSoyad: body.adSoyad || body.name
+    }
 
     const obj = await User.findOneAndUpdate({
         _id: req.params._id
     }, {
-        ...body
+        ...update
     }, {
         new: true
     })
@@ -95,7 +146,7 @@ router.patch('/user/:_id', async (req, res) => {
     res.send(obj)
 });
 
-router.get('/users', async (req, res) => {
+router.get('/users', authenticate, async (req, res) => {
 
     const users = await User.find({})
     console.log('users found', users)

@@ -1,3 +1,4 @@
+require('dotenv').config();
 require('./db/mongoose');
 
 const express = require('express');
@@ -12,6 +13,8 @@ app.use(bodyParser.json());
 
 const routeUser = require('./routes/user');
 app.use('/api',routeUser);
+const routeEvent = require('./routes/event');
+app.use('/api', routeEvent);
 
 const publicPath = path.join(__dirname, '..', 'build')
 app.use(express.static(publicPath))

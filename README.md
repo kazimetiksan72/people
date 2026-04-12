@@ -2,6 +2,28 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Environment Variables
+
+Before running backend routes, set these environment variables (use `.env.example` as a reference):
+
+- `MONGODB_URI`
+- `JWT_SECRET`
+
+## Mobile App (React Native)
+
+This repository now includes a React Native mobile app under `mobile/` built with Expo.
+
+Quick start:
+
+```bash
+cd mobile
+npm install
+cp .env.example .env
+npm run start
+```
+
+Set `EXPO_PUBLIC_API_BASE_URL` in `mobile/.env` to your backend address (for example `http://192.168.1.172:8080`).
+
 ## Available Scripts
 
 In the project directory, you can run:

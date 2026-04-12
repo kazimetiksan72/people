@@ -1,70 +1,74 @@
 import React, { useEffect, useRef } from "react";
 
 export default function SpinningCornerImage({
+  loading = false,
   src = "./olive.png",
-  alt = "Spinning logo",
-  size = 80,
-  speed = 0.25, // scrollY * speed = derece (0.25 => 1000px scroll ≈ 250deg)
-  offset = 10,  // köşeden boşluk (px)
+  alt = "Loading",
+  size = 120,
+  rpm = 60
 }) {
   const imgRef = useRef(null);
   const rafRef = useRef(null);
-  const lastRotationRef = useRef(0);
+  const startTimeRef = useRef(null);
 
   useEffect(() => {
+    if (!loading) return;
 
     const prefersReduced =
       typeof window !== "undefined" &&
-      window.matchMedia &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReduced) return;
 
-    const onScroll = () => {
-      // Scroll eventleri çok sık gelir; rAF ile tek frame'e indiriyoruz
+    const degPerMs = (rpm * 360) / 60000;
 
-      console.log('scrolling')
-      // if (rafRef.current) return;
+    const animate = (time) => {
+      if (!startTimeRef.current) startTimeRef.current = time;
 
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = null;
+      const elapsed = time - startTimeRef.current;
+      const rotation = elapsed * degPerMs;
 
-        const y = window.scrollY || 0;
-        const rotation = y * speed; // derece
+      if (imgRef.current) {
+        // ✅ SAĞ-SOL (Y ekseni)
+        imgRef.current.style.transform = `rotateY(${rotation}deg)`;
+      }
 
-        if (Math.abs(rotation - lastRotationRef.current) < 0.1) return;
-        lastRotationRef.current = rotation;
-
-        if (imgRef.current) {
-          imgRef.current.style.transform = `perspective(600px) rotateY(${rotation}deg)`;
-        }
-      });
+      rafRef.current = requestAnimationFrame(animate);
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(); // ilk render'da da ayarlasın
+    rafRef.current = requestAnimationFrame(animate);
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      startTimeRef.current = null;
     };
-  }, [speed]);
+  }, [loading, rpm]);
+
+  if (!loading) return null;
 
   return (
-    <img
-      ref={imgRef}
-      src={src}
-      alt={alt}
-      className="spinning-corner"
+    <div
       style={{
         position: "fixed",
-        top: offset,
-        right: offset,
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        perspective: "1000px",
         zIndex: 9999,
-        pointerEvents: "none",
-        transformStyle: "preserve-3d",
-        willChange: "transform",
+        pointerEvents: "none"
       }}
-    />
+    >
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        style={{
+          height: size,
+          transformStyle: "preserve-3d",
+          willChange: "transform"
+        }}
+      />
+    </div>
   );
 }

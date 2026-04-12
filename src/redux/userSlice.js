@@ -5,11 +5,31 @@ import {
 
 import axios from 'axios'
 
-const initialState = {
-    codes: [],
-    xauth: undefined,
-    profile: undefined
+const getSessionProfile = () => {
+    if (typeof window === 'undefined') {
+        return undefined
+    }
+
+    const rawProfile = sessionStorage.getItem('profile')
+    if (!rawProfile) {
+        return undefined
+    }
+
+    try {
+        return JSON.parse(rawProfile)
+    } catch (e) {
+        sessionStorage.removeItem('profile')
+        return undefined
+    }
 }
+
+const createInitialState = () => ({
+    users: [],
+    xauth: typeof window !== 'undefined' ? sessionStorage.getItem('xauth') : null,
+    profile: getSessionProfile()
+})
+
+const initialState = createInitialState()
 
 export const userSlice = createSlice({
     name: 'user',
@@ -36,17 +56,23 @@ export const userSlice = createSlice({
         },
         setProfile: (state, {payload}) => {
             state.profile = payload
+            sessionStorage.setItem('profile', JSON.stringify(payload))
+        },
+        setUsers: (state, {payload}) => {
+            state.users = payload
         },
         setCodes: (state, {payload}) => {
             state.codes = payload
         },
-        signOut: (state, {payload}) => {
-            return initialState
+        signOut: () => {
+            sessionStorage.removeItem('xauth')
+            sessionStorage.removeItem('profile')
+            return createInitialState()
         }
     }
 })
 
-export const {add, setAll, setXAuth, setProfile, setCodes, signOut} = userSlice.actions
+export const {add, setAll, setXAuth, setProfile, setCodes, signOut, setUsers} = userSlice.actions
 
 export const getMe = createAsyncThunk('getMe', async (info, { getState, dispatch }) => {
 
@@ -103,11 +129,11 @@ export const signIn = createAsyncThunk('signIn', async (info, { getState, dispat
     } = info
 
     const url = '/api/signin'
-    axios.post(url, {
-        email,
-        password
-    })
-    .then((response) => {
+    try {
+        const response = await axios.post(url, {
+            email,
+            password
+        })
 
         const xauth = response.headers.xauth
         const profile = response.data
@@ -125,12 +151,121 @@ export const signIn = createAsyncThunk('signIn', async (info, { getState, dispat
         )
 
         callback(true)
-    })
-    .catch((err) => {
+    } catch (err) {
         console.log('error', err)
         callback(false)
-    })
+    }
 })
+
+export const getUsers = createAsyncThunk('getUsers', async (info, { getState, dispatch }) => {
+
+    console.log('thunk params', info)
+
+    const {user: {xauth}} = getState()
+    console.log('getUsers', xauth)
+
+    const {
+        callback,
+    } = info
+
+    console.log('getUsers 1', info)
+
+    const url = '/api/users'
+    try {
+        const response = await axios.get(url, {
+            headers: {
+                xauth
+            }
+        })
+        console.log('thunk get users', response.data)
+
+        dispatch(
+            setUsers(
+                response.data
+            )
+        )
+
+        callback(true)
+    } catch (err) {
+        console.log('error', err)
+        callback(false)
+    }
+})
+
+export const updateMyProfile = createAsyncThunk('updateMyProfile', async (info, { getState, dispatch }) => {
+
+    const {
+        callback,
+        userId,
+        payload
+    } = info
+
+    const {user: {xauth, users, profile}} = getState()
+
+    if (!userId) {
+        if (callback) callback(false)
+        return
+    }
+
+    try {
+        const response = await axios.patch('/api/user/' + userId, payload, {
+            headers: {
+                xauth
+            }
+        })
+
+        const updatedUser = response.data
+
+        dispatch(
+            setUsers(
+                users.map((u) => u._id === updatedUser._id ? updatedUser : u)
+            )
+        )
+
+        if (profile && profile._id === updatedUser._id) {
+            dispatch(
+                setProfile(
+                    updatedUser
+                )
+            )
+        }
+
+        if (callback) callback(true, updatedUser)
+    } catch (err) {
+        console.log('error', err)
+        if (callback) callback(false)
+    }
+})
+
+export const changeMyPassword = createAsyncThunk('changeMyPassword', async (info, { getState }) => {
+
+    const {
+        callback,
+        currentPassword,
+        newPassword
+    } = info
+
+    const {user: {xauth}} = getState()
+
+    try {
+        await axios.post('/api/user/me/change-password', {
+            currentPassword,
+            newPassword
+        }, {
+            headers: {
+                xauth
+            }
+        })
+
+        if (callback) callback(true)
+    } catch (err) {
+        console.log('error', err)
+        if (callback) {
+            callback(false, err?.response?.data?.errorMessage || 'Şifre güncellenemedi.')
+        }
+    }
+})
+
 
 export const generateQR = createAsyncThunk('generateQR', async (info, { getState, dispatch }) => {
 

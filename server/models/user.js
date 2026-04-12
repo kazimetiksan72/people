@@ -3,7 +3,11 @@ const _ = require('lodash')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
-const secretWord = process.env.JWT_SECRET
+const jwtSecret = process.env.JWT_SECRET
+
+if (!jwtSecret) {
+  throw new Error('Missing required environment variable: JWT_SECRET')
+}
 
 const UserSchema = new mongoose.Schema({
   matrikul: {
@@ -60,6 +64,9 @@ const UserSchema = new mongoose.Schema({
   ePosta: {
     type: String
   },
+  sifre: {
+    type: String
+  },
   xauth: {
     type: String
   },
@@ -75,7 +82,7 @@ const UserSchema = new mongoose.Schema({
 
 UserSchema.methods.generateAuthToken = function () {
   const user = this
-  const xauth = jwt.sign({_id: user._id.toHexString()}, secretWord).toString()
+  const xauth = jwt.sign({_id: user._id.toHexString()}, jwtSecret).toString()
 
   user.xauth = xauth
 
@@ -84,31 +91,33 @@ UserSchema.methods.generateAuthToken = function () {
   })
 };
 
-// UserSchema.statics.findByToken = async function (xauth) {
-//   const User = this
-//   let decoded
-
-//   try {
-//     decoded = jwt.verify(xauth, secretWord)
-//   } catch (e) {
-
-//     return Promise.reject()
-//   }
-
-//   console.log('d', decoded)
-
-//   return User.findOne({
-//     _id: decoded._id,
-//     xauth
-//   })
-// }
-
-UserSchema.statics.findByCredentials = function (ePosta, matrikul) {
-
-  // console.log(email, password)
-
+UserSchema.statics.findByToken = async function (xauth) {
   const User = this
-  return User.findOne({ePosta, matrikul})
+  let decoded
+
+  try {
+    decoded = jwt.verify(xauth, jwtSecret)
+  } catch (e) {
+
+    return Promise.reject()
+  }
+
+  console.log('d', decoded)
+
+  console.log('will find one', {
+    _id: decoded._id,
+    xauth
+  })
+
+  return User.findOne({
+    _id: decoded._id,
+    xauth
+  })
+}
+
+UserSchema.statics.findByCredentials = function (email, password) {
+  const User = this
+  return User.findOne({ePosta: email})
   .then((user) => {
 
     console.log('found model', user)
@@ -118,15 +127,16 @@ UserSchema.statics.findByCredentials = function (ePosta, matrikul) {
     }
 
     return new Promise((resolve, reject) => {
+      const expectedPassword = user.sifre || user.matrikul
 
-    console.log('found model one', user.matrikul, matrikul)
+      console.log('found model one', expectedPassword, password)
 
-    if (user.matrikul === matrikul) {
-        return resolve(user)
-      } else {
-        return reject()
-      }
-    })
+      if (expectedPassword === password) {
+          return resolve(user)
+        } else {
+          return reject()
+        }
+      })
   })
 }
 

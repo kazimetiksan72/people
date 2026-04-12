@@ -4,9 +4,9 @@ import {
 
 export const useRedux = () => {
     
-    const codes = useSelector(state => state.user.codes)
+    const users = useSelector(state => state.user.users)
     const xauth = useSelector(state => state.user.xauth)
     const profile = useSelector(state => state.user.profile)
 
-    return {codes, xauth, profile}
+    return {users, xauth, profile}
 }
