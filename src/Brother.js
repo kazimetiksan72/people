@@ -44,7 +44,7 @@ import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
 
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useRedux } from './redux/hooks'
-import { getUsers, updateMyProfile } from './redux/requests'
+import { deleteUser, getUsers, markUserAsDeceased, updateMyProfile } from './redux/requests'
 
 const safeText = (value) => {
   if (value === null || value === undefined) return '-'
@@ -97,6 +97,21 @@ const formatLongDateTr = (value) => {
   }
 
   return text
+}
+
+const formatDateOnlyTr = (value) => {
+  if (!value) return ''
+
+  const parsed = new Date(value)
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toLocaleDateString('tr-TR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })
+  }
+
+  return formatLongDateTr(value)
 }
 
 const KAN_GRUBU_OPTIONS = ['A Rh+', 'A Rh-', 'B Rh+', 'B Rh-', 'AB Rh+', 'AB Rh-', '0 Rh+', '0 Rh-']
@@ -287,6 +302,13 @@ export default function Brother() {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [formError, setFormError] = useState('')
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const [deleteReason, setDeleteReason] = useState('')
+  const [isDeceasedOpen, setIsDeceasedOpen] = useState(false)
+  const [isMarkingDeceased, setIsMarkingDeceased] = useState(false)
+  const [deceasedError, setDeceasedError] = useState('')
   const [rawDateHints, setRawDateHints] = useState({
     dogumTarihi: '',
     dogumTarihi2: ''
@@ -357,6 +379,11 @@ export default function Brother() {
   const isOwnProfile = Boolean(profile?.matrikul) && String(profile.matrikul) === String(user.matrikul)
   const canEditProfile = isAdmin || isOwnProfile
   const childrenDisplayText = getChildrenDisplayText(user)
+  const canDeleteAsKazim = String(profile?.ePosta || '').trim().toLowerCase() === 'kazim@pikselmutfak.com'
+  const isAlreadyDeceased = Boolean(user?.vefatEtti)
+  const isRemovedFromList = user?.listedeGorunsun === false
+  const separationDateText = formatDateOnlyTr(user?.silinmeTarihi) || '-'
+  const separationReasonText = String(user?.silinmeNedeni || '').trim() || '-'
 
   const openEditDialog = () => {
     setFormError('')
@@ -439,6 +466,52 @@ export default function Brother() {
     })
   }
 
+  const onDeleteBrother = () => {
+    if (!canDeleteAsKazim) return
+    const reasonText = String(deleteReason || '').trim()
+    if (!reasonText) {
+      setDeleteError('Silme nedeni zorunludur.')
+      return
+    }
+
+    setIsDeleting(true)
+    setDeleteError('')
+
+    deleteUser({
+      userId: user._id,
+      reason: reasonText,
+      callback: (ok, message) => {
+        setIsDeleting(false)
+        if (!ok) {
+          setDeleteError(message || 'Silme sırasında bir hata oluştu.')
+          return
+        }
+        setIsDeleteOpen(false)
+        navigate('/', { replace: true })
+      }
+    })
+  }
+
+  const onMarkDeceased = () => {
+    if (!canDeleteAsKazim || isAlreadyDeceased) return
+
+    setIsMarkingDeceased(true)
+    setDeceasedError('')
+
+    markUserAsDeceased({
+      userId: user._id,
+      callback: (ok, resultOrMessage) => {
+        setIsMarkingDeceased(false)
+        if (!ok) {
+          setDeceasedError(resultOrMessage || 'Vefat işaretleme sırasında bir hata oluştu.')
+          return
+        }
+        setIsDeceasedOpen(false)
+        navigate('/hicbir-k-olmez')
+      }
+    })
+  }
+
   const sections = [
     {
       title: 'Kimlik Bilgileri',
@@ -475,12 +548,11 @@ export default function Brother() {
       ]
     },
     {
-      title: 'İletişim ve Adres',
+      title: 'İletişim',
       rows: [
         { label: 'Telefon', value: user.tlfGsmEvIs, icon: <PhoneRoundedIcon fontSize="small" />, link: phoneDigits ? `tel:${phoneDigits}` : undefined },
         { label: 'E-posta', value: user.ePosta, icon: <EmailRoundedIcon fontSize="small" />, link: user.ePosta ? `mailto:${user.ePosta}` : undefined },
-        { label: 'Ev Adresi', value: user.evAdresi, icon: <HomeRoundedIcon fontSize="small" /> },
-        { label: 'İş Adresi', value: user.isAdresi, icon: <WorkRoundedIcon fontSize="small" /> }
+        { label: 'Ev Adresi', value: user.evAdresi, icon: <HomeRoundedIcon fontSize="small" /> }
       ]
     }
   ]
@@ -649,24 +721,93 @@ export default function Brother() {
                   ))}
                 </Box>
 
-                {canEditProfile ? (
-                  <Button
-                    className="no-print"
-                    fullWidth
-                    variant="contained"
-                    startIcon={<EditRoundedIcon />}
-                    onClick={openEditDialog}
+                {canEditProfile || canDeleteAsKazim ? (
+                  <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                    {canEditProfile ? (
+                      <Button
+                        className="no-print"
+                        fullWidth
+                        variant="contained"
+                        startIcon={<EditRoundedIcon />}
+                        onClick={openEditDialog}
+                        sx={{
+                          textTransform: 'none',
+                          borderRadius: 2,
+                          fontFamily: 'Open Sans',
+                          fontWeight: 800,
+                          minHeight: 44
+                        }}
+                      >
+                        Bilgilerimi Güncelle
+                      </Button>
+                    ) : null}
+                    {canDeleteAsKazim && !isAlreadyDeceased && !isRemovedFromList ? (
+                      <>
+                        <Button
+                          className="no-print"
+                          variant="contained"
+                          color="error"
+                          onClick={() => {
+                            setDeleteError('')
+                            setDeleteReason('')
+                            setIsDeleteOpen(true)
+                          }}
+                          sx={{
+                            textTransform: 'none',
+                            borderRadius: 2,
+                            fontFamily: 'Open Sans',
+                            fontWeight: 800,
+                            minHeight: 44,
+                            px: 2.2,
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Sil
+                        </Button>
+                        <Button
+                          className="no-print"
+                          variant="contained"
+                          onClick={() => {
+                            setDeceasedError('')
+                            setIsDeceasedOpen(true)
+                          }}
+                          disabled={isAlreadyDeceased}
+                          sx={{
+                            textTransform: 'none',
+                            borderRadius: 2,
+                            fontFamily: 'Open Sans',
+                            fontWeight: 800,
+                            minHeight: 44,
+                            px: 2.2,
+                            whiteSpace: 'nowrap',
+                            backgroundColor: '#111',
+                            '&:hover': { backgroundColor: '#000' },
+                            '&.Mui-disabled': { backgroundColor: '#4b5563', color: '#e5e7eb' }
+                          }}
+                        >
+                          {isAlreadyDeceased ? 'Vefat Edildi' : 'Vefat'}
+                        </Button>
+                      </>
+                    ) : null}
+                  </Stack>
+                ) : null}
+
+                {isRemovedFromList ? (
+                  <Box
                     sx={{
                       mt: 1,
-                      textTransform: 'none',
+                      width: '100%',
                       borderRadius: 2,
-                      fontFamily: 'Open Sans',
-                      fontWeight: 800,
-                      minHeight: 44
+                      backgroundColor: '#fff7cc',
+                      border: '1px solid rgba(217, 170, 0, 0.35)',
+                      px: 1.4,
+                      py: 1.1
                     }}
                   >
-                    Bilgilerimi Güncelle
-                  </Button>
+                    <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 700, color: '#5f4b00' }}>
+                      {`Kardeşimiz ${separationDateText} tarihinde ${separationReasonText} sebebiyle aramızdan ayrılmıştır.`}
+                    </Typography>
+                  </Box>
                 ) : null}
               </Box>
             </Grid>
@@ -739,97 +880,135 @@ export default function Brother() {
           <Stack spacing={1.2} sx={{ pt: 0.4 }}>
             {formError ? <Alert severity="error">{formError}</Alert> : null}
 
-            <TextField
-              label="Doğum Tarihi"
-              type="date"
-              value={formData.dogumTarihi}
-              onChange={(e) => setFormData((p) => ({ ...p, dogumTarihi: e.target.value }))}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-              helperText={rawDateHints.dogumTarihi ? `Mevcut kayıt: ${rawDateHints.dogumTarihi}` : ''}
-            />
-            <TextField label="Doğum Yeri" value={formData.dogumYeri} onChange={(e) => setFormData((p) => ({ ...p, dogumYeri: e.target.value }))} fullWidth />
-            <TextField
-              select
-              label="Kan Grubu"
-              value={formData.kanGrubu}
-              onChange={(e) => setFormData((p) => ({ ...p, kanGrubu: e.target.value }))}
-              fullWidth
-            >
-              {KAN_GRUBU_OPTIONS.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField label="Mesleği" value={formData.meslegi} onChange={(e) => setFormData((p) => ({ ...p, meslegi: e.target.value }))} fullWidth />
-            <TextField label="İşi" value={formData.isi} onChange={(e) => setFormData((p) => ({ ...p, isi: e.target.value }))} fullWidth />
-            <TextField label="İş Adresi" value={formData.isAdresi} onChange={(e) => setFormData((p) => ({ ...p, isAdresi: e.target.value }))} fullWidth multiline minRows={2} />
-            <TextField
-              select
-              label="Medeni Hali"
-              value={formData.medeniHali}
-              onChange={(e) => setFormData((p) => ({ ...p, medeniHali: e.target.value }))}
-              fullWidth
-            >
-              {MEDENI_HAL_OPTIONS.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField label="Eşinin Adı" value={formData.esininAdi} onChange={(e) => setFormData((p) => ({ ...p, esininAdi: e.target.value }))} fullWidth />
-            <TextField
-              label="Eşinin Doğum Tarihi"
-              type="date"
-              value={formData.dogumTarihi2}
-              onChange={(e) => setFormData((p) => ({ ...p, dogumTarihi2: e.target.value }))}
-              fullWidth
-              InputLabelProps={{ shrink: true }}
-              helperText={rawDateHints.dogumTarihi2 ? `Mevcut kayıt: ${rawDateHints.dogumTarihi2}` : ''}
-            />
-            <Box sx={{ border: '1px solid rgba(22,34,54,0.12)', borderRadius: 2, p: 1.2 }}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 800, fontSize: 14 }}>
-                  Çocuk Bilgileri
-                </Typography>
-                <Button
-                  startIcon={<AddRoundedIcon />}
-                  onClick={addChildRow}
-                  sx={{ textTransform: 'none' }}
-                >
-                  Çocuk Ekle
-                </Button>
-              </Stack>
+            <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 900, fontSize: 15, mb: -0.2 }}>
+              Doğum ve Sağlık
+            </Typography>
+            <Box sx={{ borderRadius: 2, p: 1.2, backgroundColor: 'rgba(255,255,255,0.78)' }}>
               <Stack spacing={1}>
-                {formData.cocukBilgileri.map((child, index) => (
-                  <Box key={`child-${index}`} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr auto' }, gap: 1 }}>
-                    <TextField
-                      label="Çocuk Adı"
-                      value={child.ad}
-                      onChange={(e) => updateChildField(index, 'ad', e.target.value)}
-                      fullWidth
-                    />
-                    <TextField
-                      label="Doğum Tarihi"
-                      type="date"
-                      value={child.dogumTarihi}
-                      onChange={(e) => updateChildField(index, 'dogumTarihi', e.target.value)}
-                      fullWidth
-                      InputLabelProps={{ shrink: true }}
-                    />
-                    <Button
-                      color="error"
-                      onClick={() => removeChildRow(index)}
-                      sx={{ textTransform: 'none', minWidth: 44 }}
-                    >
-                      <DeleteOutlineRoundedIcon fontSize="small" />
-                    </Button>
-                  </Box>
-                ))}
+                <TextField
+                  label="Doğum Tarihi"
+                  type="date"
+                  value={formData.dogumTarihi}
+                  onChange={(e) => setFormData((p) => ({ ...p, dogumTarihi: e.target.value }))}
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  helperText={rawDateHints.dogumTarihi ? `Mevcut kayıt: ${rawDateHints.dogumTarihi}` : ''}
+                />
+                <TextField label="Doğum Yeri" value={formData.dogumYeri} onChange={(e) => setFormData((p) => ({ ...p, dogumYeri: e.target.value }))} fullWidth />
+                <TextField
+                  select
+                  label="Kan Grubu"
+                  value={formData.kanGrubu}
+                  onChange={(e) => setFormData((p) => ({ ...p, kanGrubu: e.target.value }))}
+                  fullWidth
+                >
+                  {KAN_GRUBU_OPTIONS.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Stack>
             </Box>
-            <TextField label="Ev Adresi" value={formData.evAdresi} onChange={(e) => setFormData((p) => ({ ...p, evAdresi: e.target.value }))} fullWidth multiline minRows={2} />
+            <Divider sx={{ borderColor: 'rgba(22,34,54,0.14)' }} />
+
+            <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 900, fontSize: 15, mb: -0.2 }}>
+              İş Bilgileri
+            </Typography>
+            <Box sx={{ borderRadius: 2, p: 1.2, backgroundColor: 'rgba(255,255,255,0.78)' }}>
+              <Stack spacing={1}>
+                <TextField label="Mesleği" value={formData.meslegi} onChange={(e) => setFormData((p) => ({ ...p, meslegi: e.target.value }))} fullWidth />
+                <TextField label="İşi" value={formData.isi} onChange={(e) => setFormData((p) => ({ ...p, isi: e.target.value }))} fullWidth />
+                <TextField label="İş Adresi" value={formData.isAdresi} onChange={(e) => setFormData((p) => ({ ...p, isAdresi: e.target.value }))} fullWidth multiline minRows={2} />
+              </Stack>
+            </Box>
+            <Divider sx={{ borderColor: 'rgba(22,34,54,0.14)' }} />
+
+            <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 900, fontSize: 15, mb: -0.2 }}>
+              Aile Bilgileri
+            </Typography>
+            <Box sx={{ borderRadius: 2, p: 1.2, backgroundColor: 'rgba(255,255,255,0.78)' }}>
+              <Stack spacing={1}>
+                <TextField
+                  select
+                  label="Medeni Hali"
+                  value={formData.medeniHali}
+                  onChange={(e) => setFormData((p) => ({ ...p, medeniHali: e.target.value }))}
+                  fullWidth
+                >
+                  {MEDENI_HAL_OPTIONS.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                {formData.medeniHali === 'Evli' ? (
+                  <>
+                    <TextField label="Eşinin Adı" value={formData.esininAdi} onChange={(e) => setFormData((p) => ({ ...p, esininAdi: e.target.value }))} fullWidth />
+                    <TextField
+                      label="Eşinin Doğum Tarihi"
+                      type="date"
+                      value={formData.dogumTarihi2}
+                      onChange={(e) => setFormData((p) => ({ ...p, dogumTarihi2: e.target.value }))}
+                      fullWidth
+                      InputLabelProps={{ shrink: true }}
+                      helperText={rawDateHints.dogumTarihi2 ? `Mevcut kayıt: ${rawDateHints.dogumTarihi2}` : ''}
+                    />
+                  </>
+                ) : null}
+
+                <Box sx={{ borderRadius: 2, p: 1, backgroundColor: 'rgba(255,255,255,0.62)' }}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+                    <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 800, fontSize: 14 }}>
+                      Çocuklar
+                    </Typography>
+                    <Button
+                      startIcon={<AddRoundedIcon />}
+                      onClick={addChildRow}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      Çocuk Ekle
+                    </Button>
+                  </Stack>
+                  <Stack spacing={1}>
+                    {formData.cocukBilgileri.map((child, index) => (
+                      <Box key={`child-${index}`} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr auto' }, gap: 1 }}>
+                        <TextField
+                          label="Çocuk Adı"
+                          value={child.ad}
+                          onChange={(e) => updateChildField(index, 'ad', e.target.value)}
+                          fullWidth
+                        />
+                        <TextField
+                          label="Doğum Tarihi"
+                          type="date"
+                          value={child.dogumTarihi}
+                          onChange={(e) => updateChildField(index, 'dogumTarihi', e.target.value)}
+                          fullWidth
+                          InputLabelProps={{ shrink: true }}
+                        />
+                        <Button
+                          color="error"
+                          onClick={() => removeChildRow(index)}
+                          sx={{ textTransform: 'none', minWidth: 44 }}
+                        >
+                          <DeleteOutlineRoundedIcon fontSize="small" />
+                        </Button>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              </Stack>
+            </Box>
+            <Divider sx={{ borderColor: 'rgba(22,34,54,0.14)' }} />
+
+            <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 900, fontSize: 15, mb: -0.2 }}>
+              İletişim ve Adres
+            </Typography>
+            <Box sx={{ borderRadius: 2, p: 1.2, backgroundColor: 'rgba(255,255,255,0.78)' }}>
+              <TextField label="Ev Adresi" value={formData.evAdresi} onChange={(e) => setFormData((p) => ({ ...p, evAdresi: e.target.value }))} fullWidth multiline minRows={2} />
+            </Box>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 2, py: 1.2 }}>
@@ -838,6 +1017,93 @@ export default function Brother() {
           </Button>
           <Button variant="contained" onClick={onSaveProfile} disabled={isSaving} sx={{ textTransform: 'none' }}>
             {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={isDeleteOpen}
+        onClose={() => {
+          if (!isDeleting) setIsDeleteOpen(false)
+        }}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle sx={{ fontFamily: 'Open Sans', fontWeight: 900 }}>
+          Kardeş Sil
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={1}>
+            {deleteError ? <Alert severity="error">{deleteError}</Alert> : null}
+            <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 700 }}>
+              {safeText(user.adSoyad)} kaydını silmek istediğine emin misin?
+            </Typography>
+            <TextField
+              label="Silme Nedeni"
+              placeholder="Silinme gerekçesini yazın"
+              value={deleteReason}
+              onChange={(e) => setDeleteReason(e.target.value)}
+              fullWidth
+              multiline
+              minRows={2}
+              required
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 2, py: 1.2 }}>
+          <Button
+            onClick={() => setIsDeleteOpen(false)}
+            disabled={isDeleting}
+            sx={{ textTransform: 'none' }}
+          >
+            Vazgeç
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={onDeleteBrother}
+            disabled={isDeleting}
+            sx={{ textTransform: 'none' }}
+          >
+            {isDeleting ? 'Siliniyor...' : 'Evet, Sil'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={isDeceasedOpen}
+        onClose={() => {
+          if (!isMarkingDeceased) setIsDeceasedOpen(false)
+        }}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle sx={{ fontFamily: 'Open Sans', fontWeight: 900 }}>
+          Vefat İşaretle
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={1}>
+            {deceasedError ? <Alert severity="error">{deceasedError}</Alert> : null}
+            <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 700 }}>
+              {safeText(user.adSoyad)} kaydını vefat eden kardeş olarak işaretlemek istediğine emin misin?
+            </Typography>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 2, py: 1.2 }}>
+          <Button
+            onClick={() => setIsDeceasedOpen(false)}
+            disabled={isMarkingDeceased}
+            sx={{ textTransform: 'none' }}
+          >
+            Vazgeç
+          </Button>
+          <Button
+            variant="contained"
+            onClick={onMarkDeceased}
+            disabled={isMarkingDeceased || isAlreadyDeceased}
+            sx={{ textTransform: 'none', backgroundColor: '#111', '&:hover': { backgroundColor: '#000' } }}
+          >
+            {isMarkingDeceased ? 'Kaydediliyor...' : 'Onayla'}
           </Button>
         </DialogActions>
       </Dialog>

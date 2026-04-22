@@ -23,10 +23,12 @@ import EventRoundedIcon from '@mui/icons-material/EventRounded'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
 import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded'
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
+import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded'
 
 const Security = () => {
   const navigate = useNavigate()
-  const { xauth } = useRedux()
+  const { xauth, profile } = useRedux()
   const [menuOpen, setMenuOpen] = useState(false)
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -44,6 +46,7 @@ const Security = () => {
     fontWeight: weight,
     fontStyle: 'normal'
   })
+  const canSeeAyrilanlar = String(profile?.ePosta || '').trim().toLowerCase() === 'kazim@pikselmutfak.com'
 
   const onSubmit = () => {
     if (!currentPassword || !newPassword || !newPasswordAgain) {
@@ -147,6 +150,26 @@ const Security = () => {
                   <ListItemText primary="Güvenlik" />
                 </ListItemButton>
               </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => {
+                  setMenuOpen(false)
+                  navigate('/hicbir-k-olmez')
+                }}>
+                  <ListItemIcon><FavoriteRoundedIcon /></ListItemIcon>
+                  <ListItemText primary="Hiçbir K. Ölmez" />
+                </ListItemButton>
+              </ListItem>
+              {canSeeAyrilanlar ? (
+                <ListItem disablePadding>
+                  <ListItemButton onClick={() => {
+                    setMenuOpen(false)
+                    navigate('/ayrilanlar')
+                  }}>
+                    <ListItemIcon><PersonRemoveRoundedIcon /></ListItemIcon>
+                    <ListItemText primary="Ayrılanlar" />
+                  </ListItemButton>
+                </ListItem>
+              ) : null}
             </List>
 
             <Box sx={{ flexGrow: 1 }} />

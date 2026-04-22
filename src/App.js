@@ -18,6 +18,8 @@ import Brother from './Brother'
 import Events from './Events'
 import EventDetail from './EventDetail'
 import Security from './Security'
+import NeverBrotherDies from './NeverBrotherDies'
+import Ayrilanlar from './Ayrilanlar'
 
 const App = () => {
 
@@ -40,6 +42,8 @@ const App = () => {
             <Route path='/events' element={<Events />} />
             <Route path='/events/:id' element={<EventDetail />} />
             <Route path='/security' element={<Security />} />
+            <Route path='/hicbir-k-olmez' element={<NeverBrotherDies />} />
+            <Route path='/ayrilanlar' element={<Ayrilanlar />} />
             <Route path='/brother/:matrikul' element={<Brother />} />
             <Route path='/signin' element={<SignIn />} />
             <Route path='*' element={<SignIn />} />

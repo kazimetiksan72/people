@@ -105,12 +105,53 @@ router.post('/user/me/change-password', authenticate, async (req, res) => {
 })
 
 router.delete('/user/:_id', authenticate, async (req, res) => {
+    const allowedEmail = 'kazim@pikselmutfak.com'
+    const requesterEmail = String(req.user?.ePosta || '').trim().toLowerCase()
+    if (requesterEmail !== allowedEmail) {
+        return res.status(403).send({ errorMessage: 'Bu işlem için yetkiniz yok.' })
+    }
 
-    await User.findOneAndRemove({
+    const reason = String(req.body?.reason || '').trim()
+    if (!reason) {
+        return res.status(400).send({ errorMessage: 'Silme nedeni zorunludur.' })
+    }
+
+    const updatedUser = await User.findOneAndUpdate({
         _id: req.params._id
+    }, {
+        listedeGorunsun: false,
+        silinmeNedeni: reason,
+        silinmeTarihi: new Date()
+    }, {
+        new: true
     })
-    res.sendStatus(200)
+    if (!updatedUser) {
+        return res.status(404).send({ errorMessage: 'Kullanıcı bulunamadı.' })
+    }
+    res.send(updatedUser)
 });
+
+router.post('/user/:_id/deceased', authenticate, async (req, res) => {
+    const allowedEmail = 'kazim@pikselmutfak.com'
+    const requesterEmail = String(req.user?.ePosta || '').trim().toLowerCase()
+    if (requesterEmail !== allowedEmail) {
+        return res.status(403).send({ errorMessage: 'Bu işlem için yetkiniz yok.' })
+    }
+
+    const updatedUser = await User.findOneAndUpdate({
+        _id: req.params._id
+    }, {
+        vefatEtti: true
+    }, {
+        new: true
+    })
+
+    if (!updatedUser) {
+        return res.status(404).send({ errorMessage: 'Kullanıcı bulunamadı.' })
+    }
+
+    res.send(updatedUser)
+})
 
 router.patch('/user/:_id', authenticate, async (req, res) => {
 

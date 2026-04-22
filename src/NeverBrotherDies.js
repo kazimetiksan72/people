@@ -6,23 +6,23 @@ import { getUsers, signOut } from './redux/requests'
 import SpinningCornerImage from './SpinningCornerImage'
 
 import {
+  Avatar,
   Box,
   Button,
+  Chip,
   Divider,
   Drawer,
   IconButton,
   List,
+  ListItem,
+  ListItemAvatar,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  ListItem,
-  ListItemAvatar,
-  Avatar,
-  Typography,
-  TextField,
   Paper,
-  Chip,
-  Stack
+  Stack,
+  TextField,
+  Typography
 } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
@@ -86,7 +86,7 @@ const rowEnter = keyframes`
   }
 `
 
-const Home = () => {
+const NeverBrotherDies = () => {
   const navigate = useNavigate()
   const { xauth, users, profile } = useRedux()
   const [search, setSearch] = useState('')
@@ -100,11 +100,13 @@ const Home = () => {
     getUsers({ callback: () => {} })
   }, [xauth, users.length])
 
-  const sortedUsers = useMemo(() => {
-    return users
-      .filter((u) => u.listedeGorunsun !== false)
-      .sort((a, b) => Number(a.idaMatrikul) - Number(b.idaMatrikul))
+  const deceasedUsers = useMemo(() => {
+    return users.filter((u) => Boolean(u.vefatEtti))
   }, [users])
+
+  const sortedUsers = useMemo(() => {
+    return [...deceasedUsers].sort((a, b) => Number(a.idaMatrikul) - Number(b.idaMatrikul))
+  }, [deceasedUsers])
 
   const filteredUsers = useMemo(() => {
     const term = normalize(search)
@@ -207,37 +209,30 @@ const Home = () => {
 
               <Box>
                 <Typography sx={{ ...fontStyle(900), fontSize: { xs: 21, md: 26 }, lineHeight: 1.05 }}>
-                  İDA Kardeş Listesi
+                  Hiçbir Kardeş Ölmez
                 </Typography>
                 <Typography sx={{ ...fontStyle(600), fontSize: 13, opacity: 0.72, mt: 0.3 }}>
-                  Toplam {users.length} kayıt
+                  Toplam {deceasedUsers.length} kayıt
                 </Typography>
               </Box>
             </Stack>
 
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={1}
-              alignItems={{ xs: 'stretch', sm: 'center' }}
-              sx={{ width: { xs: '100%', md: 'auto' } }}
-            >
-              <TextField
-                size="small"
-                placeholder="Ad, matrikül, e-posta veya telefon ara"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                InputProps={{
-                  startAdornment: <SearchIcon fontSize="small" sx={{ mr: 1, opacity: 0.65 }} />
-                }}
-                sx={{
-                  width: { xs: '100%', md: 420 },
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    backgroundColor: 'rgba(255,255,255,0.88)'
-                  }
-                }}
-              />
-            </Stack>
+            <TextField
+              size="small"
+              placeholder="Ad, matrikül, e-posta veya telefon ara"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              InputProps={{
+                startAdornment: <SearchIcon fontSize="small" sx={{ mr: 1, opacity: 0.65 }} />
+              }}
+              sx={{
+                width: { xs: '100%', md: 420 },
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  backgroundColor: 'rgba(255,255,255,0.88)'
+                }
+              }}
+            />
           </Stack>
         </Paper>
 
@@ -534,10 +529,9 @@ const Home = () => {
             ))}
           </List>
         </Paper>
-
       </Box>
     </div>
   )
 }
 
-export default Home
+export default NeverBrotherDies

@@ -266,6 +266,88 @@ export const changeMyPassword = createAsyncThunk('changeMyPassword', async (info
     }
 })
 
+export const deleteUser = createAsyncThunk('deleteUser', async (info, { getState, dispatch }) => {
+    const {
+        callback,
+        userId,
+        reason
+    } = info
+
+    const { user: { xauth, users, profile } } = getState()
+
+    if (!userId) {
+        if (callback) callback(false, 'Kullanıcı bulunamadı.')
+        return
+    }
+
+    try {
+        const response = await axios.delete('/api/user/' + userId, {
+            data: {
+                reason
+            },
+            headers: {
+                xauth
+            }
+        })
+
+        const updatedUser = response.data
+
+        dispatch(
+            setUsers(
+                users.map((u) => u._id === updatedUser._id ? updatedUser : u)
+            )
+        )
+
+        if (profile && profile._id === updatedUser._id) {
+            dispatch(setProfile(updatedUser))
+        }
+
+        if (callback) callback(true)
+    } catch (err) {
+        const errorMessage = err?.response?.data?.errorMessage || 'Silme sırasında bir hata oluştu.'
+        if (callback) callback(false, errorMessage)
+    }
+})
+
+export const markUserAsDeceased = createAsyncThunk('markUserAsDeceased', async (info, { getState, dispatch }) => {
+    const {
+        callback,
+        userId
+    } = info
+
+    const { user: { xauth, users, profile } } = getState()
+
+    if (!userId) {
+        if (callback) callback(false, 'Kullanıcı bulunamadı.')
+        return
+    }
+
+    try {
+        const response = await axios.post('/api/user/' + userId + '/deceased', {}, {
+            headers: {
+                xauth
+            }
+        })
+
+        const updatedUser = response.data
+
+        dispatch(
+            setUsers(
+                users.map((u) => u._id === updatedUser._id ? updatedUser : u)
+            )
+        )
+
+        if (profile && profile._id === updatedUser._id) {
+            dispatch(setProfile(updatedUser))
+        }
+
+        if (callback) callback(true, updatedUser)
+    } catch (err) {
+        const errorMessage = err?.response?.data?.errorMessage || 'Vefat işaretleme sırasında bir hata oluştu.'
+        if (callback) callback(false, errorMessage)
+    }
+})
+
 
 export const generateQR = createAsyncThunk('generateQR', async (info, { getState, dispatch }) => {
 

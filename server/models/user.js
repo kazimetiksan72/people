@@ -69,6 +69,20 @@ const UserSchema = new mongoose.Schema({
   tlfGsmEvIs: {
     type: String
   },
+  listedeGorunsun: {
+    type: Boolean,
+    default: true
+  },
+  silinmeNedeni: {
+    type: String
+  },
+  silinmeTarihi: {
+    type: Date
+  },
+  vefatEtti: {
+    type: Boolean,
+    default: false
+  },
   ePosta: {
     type: String
   },
@@ -217,7 +231,7 @@ UserSchema.methods.toJSON = function () {
 
   const oObject = o.toObject();
 
-  return _.pick(oObject, ['_id', 'adSoyad', 'ePosta', 'matrikul', 'idaMatrikul', 'tekrisTarihi', 'dogumYeri', 'dogumTarihi', 'kanGrubu', 'meslegi', 'isi', 'medeniHali', 'esininAdi', 'dogumTarihi2', 'cocuklar', 'cocukBilgileri', 'dogumTarihleri', 'evAdresi', 'isAdresi', 'tlfGsmEvIs', 'ePosta', 'role']);
+  return _.pick(oObject, ['_id', 'adSoyad', 'ePosta', 'matrikul', 'idaMatrikul', 'tekrisTarihi', 'dogumYeri', 'dogumTarihi', 'kanGrubu', 'meslegi', 'isi', 'medeniHali', 'esininAdi', 'dogumTarihi2', 'cocuklar', 'cocukBilgileri', 'dogumTarihleri', 'evAdresi', 'isAdresi', 'tlfGsmEvIs', 'listedeGorunsun', 'silinmeNedeni', 'silinmeTarihi', 'vefatEtti', 'ePosta', 'role']);
 };
 
 const User = mongoose.model('User', UserSchema);

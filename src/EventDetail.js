@@ -32,6 +32,8 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded'
 import EventRoundedIcon from '@mui/icons-material/EventRounded'
 import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded'
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
+import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded'
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded'
 import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded'
@@ -106,7 +108,7 @@ const isEventClosed = (date, time) => {
 const EventDetail = () => {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { xauth } = useRedux()
+  const { xauth, profile } = useRedux()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
@@ -125,6 +127,7 @@ const EventDetail = () => {
   const longitude = Number(event?.longitude)
   const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude)
   const eventClosed = isEventClosed(event?.date, event?.time)
+  const canSeeAyrilanlar = String(profile?.ePosta || '').trim().toLowerCase() === 'kazim@pikselmutfak.com'
 
   const fontStyle = (weight) => ({
     fontFamily: 'Open Sans',
@@ -339,6 +342,26 @@ const EventDetail = () => {
                 <ListItemText primary="Güvenlik" />
               </ListItemButton>
             </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => {
+                setMenuOpen(false)
+                navigate('/hicbir-k-olmez')
+              }}>
+                <ListItemIcon><FavoriteRoundedIcon /></ListItemIcon>
+                <ListItemText primary="Hiçbir K. Ölmez" />
+              </ListItemButton>
+            </ListItem>
+            {canSeeAyrilanlar ? (
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => {
+                  setMenuOpen(false)
+                  navigate('/ayrilanlar')
+                }}>
+                  <ListItemIcon><PersonRemoveRoundedIcon /></ListItemIcon>
+                  <ListItemText primary="Ayrılanlar" />
+                </ListItemButton>
+              </ListItem>
+            ) : null}
           </List>
 
           <Box sx={{ flexGrow: 1 }} />
