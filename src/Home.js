@@ -102,7 +102,7 @@ const Home = () => {
 
   const sortedUsers = useMemo(() => {
     return users
-      .filter((u) => u.listedeGorunsun !== false)
+      .filter((u) => u.listedeGorunsun !== false && !u.vefatEtti)
       .sort((a, b) => Number(a.idaMatrikul) - Number(b.idaMatrikul))
   }, [users])
 
