@@ -210,7 +210,7 @@ const Home = () => {
                   İDA Kardeş Listesi
                 </Typography>
                 <Typography sx={{ ...fontStyle(600), fontSize: 13, opacity: 0.72, mt: 0.3 }}>
-                  Toplam {users.length} kayıt
+                  Toplam {sortedUsers.length} kayıt
                 </Typography>
               </Box>
             </Stack>
