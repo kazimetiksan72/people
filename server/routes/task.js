@@ -17,6 +17,7 @@ router.get('/tasks', authenticate, async (req, res) => {
     const tasks = await Task.find(query).sort({ createdAt: -1 })
     res.send(tasks)
   } catch (e) {
+    console.log('GET /tasks error', e)
     res.status(500).send({ errorMessage: 'Görevler alınırken hata oluştu.' })
   }
 })
@@ -59,6 +60,7 @@ router.post('/tasks', authenticate, async (req, res) => {
     await task.save()
     res.send(task)
   } catch (e) {
+    console.log('POST /tasks error', e)
     res.status(500).send({ errorMessage: 'Görev atanırken hata oluştu.' })
   }
 })
