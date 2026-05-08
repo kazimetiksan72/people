@@ -35,6 +35,7 @@ import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
 import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded'
+import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
 
 const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_API_KEY
 
@@ -495,6 +496,15 @@ const Events = () => {
                 </ListItemButton>
               </ListItem>
             ) : null}
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => {
+                setMenuOpen(false)
+                navigate('/tasks')
+              }}>
+                <ListItemIcon><AssignmentRoundedIcon /></ListItemIcon>
+                <ListItemText primary="Görevler" />
+              </ListItemButton>
+            </ListItem>
           </List>
 
           <Box sx={{ flexGrow: 1 }} />

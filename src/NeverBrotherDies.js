@@ -31,6 +31,7 @@ import EventRoundedIcon from '@mui/icons-material/EventRounded'
 import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
 import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded'
+import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
 import { keyframes } from '@emotion/react'
 
 const printStyles = `
@@ -293,6 +294,15 @@ const NeverBrotherDies = () => {
                   </ListItemButton>
                 </ListItem>
               ) : null}
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => {
+                  setMenuOpen(false)
+                  navigate('/tasks')
+                }}>
+                  <ListItemIcon><AssignmentRoundedIcon /></ListItemIcon>
+                  <ListItemText primary="Görevler" />
+                </ListItemButton>
+              </ListItem>
             </List>
 
             <Box sx={{ flexGrow: 1 }} />

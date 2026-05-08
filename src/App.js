@@ -20,6 +20,7 @@ import EventDetail from './EventDetail'
 import Security from './Security'
 import NeverBrotherDies from './NeverBrotherDies'
 import Ayrilanlar from './Ayrilanlar'
+import Tasks from './Tasks'
 
 const App = () => {
 
@@ -44,6 +45,7 @@ const App = () => {
             <Route path='/security' element={<Security />} />
             <Route path='/hicbir-k-olmez' element={<NeverBrotherDies />} />
             <Route path='/ayrilanlar' element={<Ayrilanlar />} />
+            <Route path='/tasks' element={<Tasks />} />
             <Route path='/brother/:matrikul' element={<Brother />} />
             <Route path='/signin' element={<SignIn />} />
             <Route path='*' element={<SignIn />} />
