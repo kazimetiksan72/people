@@ -6,6 +6,7 @@ import { getUsers, signOut } from './redux/requests'
 
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -19,7 +20,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  MenuItem,
   Paper,
   Stack,
   TextField,
@@ -51,7 +51,7 @@ const Tasks = () => {
   const [createError, setCreateError] = useState('')
   const [content, setContent] = useState('')
   const [assignedTo, setAssignedTo] = useState('')
-  const [assignedAt, setAssignedAt] = useState(new Date().toISOString().slice(0, 10))
+  const [assignedAt, setAssignedAt] = useState('')
   const [dueDate, setDueDate] = useState('')
   const [rejectModal, setRejectModal] = useState({ open: false, taskId: '' })
   const [rejectReason, setRejectReason] = useState('')
@@ -112,6 +112,7 @@ const Tasks = () => {
       setOpenCreate(false)
       setContent('')
       setAssignedTo('')
+      setAssignedAt('')
       setDueDate('')
       fetchTasks()
     } catch (e) {
@@ -121,6 +122,15 @@ const Tasks = () => {
 
   const patchTaskLocally = (updatedTask) => {
     setTasks((prev) => prev.map((t) => (t._id === updatedTask._id ? updatedTask : t)))
+  }
+
+  const openCreateDialog = () => {
+    setCreateError('')
+    setContent('')
+    setAssignedTo('')
+    setAssignedAt('')
+    setDueDate('')
+    setOpenCreate(true)
   }
 
   const onAccept = async (taskId) => {
@@ -163,7 +173,7 @@ const Tasks = () => {
               </Typography>
             </Stack>
             {isKazim ? (
-              <Button variant="contained" onClick={() => setOpenCreate(true)} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800) }}>
+              <Button variant="contained" onClick={openCreateDialog} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800) }}>
                 Görev Ata
               </Button>
             ) : null}
@@ -229,9 +239,21 @@ const Tasks = () => {
           <Stack spacing={1.1} sx={{ pt: 0.5 }}>
             {createError ? <Alert severity="error">{createError}</Alert> : null}
             <TextField label="Görev İçeriği" multiline minRows={2} value={content} onChange={(e) => setContent(e.target.value)} fullWidth />
-            <TextField select label="Kardeş" value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} fullWidth>
-              {assignableUsers.map((u) => <MenuItem key={u._id} value={u._id}>{u.adSoyad}</MenuItem>)}
-            </TextField>
+            <Autocomplete
+              options={assignableUsers}
+              value={assignableUsers.find((u) => u._id === assignedTo) || null}
+              onChange={(_, newValue) => setAssignedTo(newValue?._id || '')}
+              getOptionLabel={(option) => option?.adSoyad || ''}
+              isOptionEqualToValue={(option, value) => option._id === value._id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Kardeş"
+                  placeholder="Kardeş ara..."
+                  fullWidth
+                />
+              )}
+            />
             <TextField label="Görev Atanma Tarihi" type="date" value={assignedAt} onChange={(e) => setAssignedAt(e.target.value)} fullWidth InputLabelProps={{ shrink: true }} />
             <TextField label="Tamamlanma Son Tarihi" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} fullWidth InputLabelProps={{ shrink: true }} />
           </Stack>
