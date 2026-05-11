@@ -92,13 +92,25 @@ const Home = () => {
   const { xauth, users, profile } = useRedux()
   const [search, setSearch] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isUsersLoading, setIsUsersLoading] = useState(false)
 
   useEffect(() => {
-    if (!xauth || users.length > 0) {
+    if (!xauth) {
+      setIsUsersLoading(false)
       return
     }
 
-    getUsers({ callback: () => {} })
+    if (users.length > 0) {
+      setIsUsersLoading(false)
+      return
+    }
+
+    setIsUsersLoading(true)
+    getUsers({
+      callback: () => {
+        setIsUsersLoading(false)
+      }
+    })
   }, [xauth, users.length])
 
   const sortedUsers = useMemo(() => {
@@ -365,14 +377,18 @@ const Home = () => {
               <Typography sx={{ ...fontStyle(700), fontSize: 12.5, letterSpacing: 0.2, textAlign: 'right' }}></Typography>
             </ListItem>
 
-            {filteredUsers.length === 0 && (
+            {isUsersLoading ? (
+              <Box sx={{ px: 2, py: 4, textAlign: 'center' }}>
+                <Typography sx={{ ...fontStyle(800), fontSize: 18 }}>Yükleniyor...</Typography>
+              </Box>
+            ) : filteredUsers.length === 0 ? (
               <Box sx={{ px: 2, py: 4, textAlign: 'center' }}>
                 <Typography sx={{ ...fontStyle(800), fontSize: 18 }}>Sonuç bulunamadı</Typography>
                 <Typography sx={{ ...fontStyle(600), fontSize: 13.5, opacity: 0.75, mt: 0.5 }}>
                   Arama kelimesini değiştirerek tekrar deneyebilirsin.
                 </Typography>
               </Box>
-            )}
+            ) : null}
 
             {filteredUsers.map((p, idx) => (
               <Box key={p.matrikul}>
