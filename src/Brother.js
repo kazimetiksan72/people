@@ -314,6 +314,8 @@ export default function Brother() {
   const [deceasedError, setDeceasedError] = useState('')
   const [photoError, setPhotoError] = useState('')
   const [isPhotoUploading, setIsPhotoUploading] = useState(false)
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false)
+  const [isDragActive, setIsDragActive] = useState(false)
   const photoInputRef = useRef(null)
   const [rawDateHints, setRawDateHints] = useState({
     dogumTarihi: '',
@@ -522,14 +524,17 @@ export default function Brother() {
 
   const onSelectPhoto = () => {
     setPhotoError('')
+    setIsPhotoModalOpen(true)
+  }
+
+  const onPickPhoto = () => {
     if (photoInputRef.current) {
       photoInputRef.current.value = ''
       photoInputRef.current.click()
     }
   }
 
-  const onPhotoChange = (e) => {
-    const file = e.target.files?.[0]
+  const processPhotoFile = (file) => {
     if (!file) return
 
     const isSupported = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png'
@@ -552,6 +557,7 @@ export default function Brother() {
         })
 
         getUsers({ callback: () => {} })
+        setIsPhotoModalOpen(false)
       } catch (err) {
         setPhotoError(err?.response?.data?.errorMessage || 'Fotoğraf güncellenemedi.')
       } finally {
@@ -559,6 +565,11 @@ export default function Brother() {
       }
     }
     reader.readAsDataURL(file)
+  }
+
+  const onPhotoChange = (e) => {
+    const file = e.target.files?.[0]
+    processPhotoFile(file)
   }
 
   const sections = [
@@ -948,6 +959,70 @@ export default function Brother() {
           </Grid>
         )}
       </Box>
+
+      <Dialog
+        open={isPhotoModalOpen}
+        onClose={() => !isPhotoUploading && setIsPhotoModalOpen(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle sx={{ fontFamily: 'Open Sans', fontWeight: 900 }}>
+          Fotoğraf Güncelle
+        </DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={1.1}>
+            {photoError ? <Alert severity="error">{photoError}</Alert> : null}
+            <Box
+              onDragOver={(e) => {
+                e.preventDefault()
+                setIsDragActive(true)
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault()
+                setIsDragActive(false)
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                setIsDragActive(false)
+                const file = e.dataTransfer?.files?.[0]
+                processPhotoFile(file)
+              }}
+              sx={{
+                border: '2px dashed rgba(55,65,81,0.35)',
+                borderColor: isDragActive ? '#2563eb' : 'rgba(55,65,81,0.35)',
+                borderRadius: 2,
+                p: 2.2,
+                textAlign: 'center',
+                backgroundColor: isDragActive ? 'rgba(37,99,235,0.06)' : 'rgba(255,255,255,0.7)'
+              }}
+            >
+              <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 800 }}>
+                Fotoğrafı buraya sürükleyip bırakın
+              </Typography>
+              <Typography sx={{ fontFamily: 'Open Sans', fontSize: 13, color: '#4b5563', mt: 0.6 }}>
+                veya aşağıdan dosya seçin
+              </Typography>
+              <Button
+                variant="outlined"
+                onClick={onPickPhoto}
+                disabled={isPhotoUploading}
+                sx={{ mt: 1.1, textTransform: 'none', borderRadius: 2 }}
+              >
+                {isPhotoUploading ? 'Yükleniyor...' : 'Dosya Seç'}
+              </Button>
+            </Box>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 2, py: 1.2 }}>
+          <Button
+            onClick={() => setIsPhotoModalOpen(false)}
+            disabled={isPhotoUploading}
+            sx={{ textTransform: 'none' }}
+          >
+            Kapat
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         open={isEditOpen}
