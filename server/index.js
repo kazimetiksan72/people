@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 
 const bodyParser = require('body-parser');
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
 
 const routeUser = require('./routes/user');
 app.use('/api',routeUser);

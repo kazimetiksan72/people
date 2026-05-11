@@ -793,11 +793,10 @@ export default function Brother() {
                 </Box>
 
                 {canEditProfile || canDeleteAsKazim ? (
-                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1, alignItems: 'center' }}>
                     {canEditProfile ? (
                       <Button
                         className="no-print"
-                        fullWidth
                         variant="contained"
                         startIcon={<EditRoundedIcon />}
                         onClick={openEditDialog}
@@ -806,7 +805,9 @@ export default function Brother() {
                           borderRadius: 2,
                           fontFamily: 'Open Sans',
                           fontWeight: 800,
-                          minHeight: 44
+                          minHeight: 44,
+                          px: 2.2,
+                          whiteSpace: 'nowrap'
                         }}
                       >
                         Bilgilerimi Güncelle
