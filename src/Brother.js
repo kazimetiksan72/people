@@ -16,6 +16,7 @@ import {
   DialogTitle,
   Divider,
   Grid,
+  IconButton,
   MenuItem,
   Paper,
   Stack,
@@ -673,28 +674,50 @@ export default function Brother() {
                   justifyContent: 'center'
                 }}
               >
-                <Avatar
-                  src={avatarSrc}
-                  alt={safeText(user.adSoyad)}
-                  variant="rounded"
-                  sx={{
-                    width: { xs: '100%', sm: 280, md: '100%' },
-                    maxWidth: 320,
-                    height: { xs: 360, sm: 360, md: 430 },
-                    borderRadius: 3,
-                    border: '1px solid rgba(20,30,50,0.2)',
-                    backgroundColor: 'rgba(255,255,255,0.92)',
-                    fontFamily: 'Open Sans',
-                    fontWeight: 800,
-                    fontSize: 34
-                  }}
-                >
-                  {safeText(user.adSoyad)
-                    .split(' ')
-                    .slice(0, 2)
-                    .map((word) => word[0])
-                    .join('')}
-                </Avatar>
+                <Box sx={{ position: 'relative', width: { xs: '100%', sm: 280, md: '100%' }, maxWidth: 320 }}>
+                  <Avatar
+                    src={avatarSrc}
+                    alt={safeText(user.adSoyad)}
+                    variant="rounded"
+                    sx={{
+                      width: '100%',
+                      height: { xs: 360, sm: 360, md: 430 },
+                      borderRadius: 3,
+                      border: '1px solid rgba(20,30,50,0.2)',
+                      backgroundColor: 'rgba(255,255,255,0.92)',
+                      fontFamily: 'Open Sans',
+                      fontWeight: 800,
+                      fontSize: 34
+                    }}
+                  >
+                    {safeText(user.adSoyad)
+                      .split(' ')
+                      .slice(0, 2)
+                      .map((word) => word[0])
+                      .join('')}
+                  </Avatar>
+                  {canEditProfile ? (
+                    <IconButton
+                      className="no-print"
+                      onClick={onSelectPhoto}
+                      disabled={isPhotoUploading}
+                      sx={{
+                        position: 'absolute',
+                        right: 10,
+                        bottom: 10,
+                        width: 42,
+                        height: 42,
+                        backgroundColor: '#111827',
+                        color: '#fff',
+                        border: '1px solid rgba(255,255,255,0.6)',
+                        '&:hover': { backgroundColor: '#1f2937' },
+                        '&.Mui-disabled': { backgroundColor: '#6b7280', color: '#e5e7eb' }
+                      }}
+                    >
+                      <PhotoCameraRoundedIcon fontSize="small" />
+                    </IconButton>
+                  ) : null}
+                </Box>
               </Box>
             </Grid>
 
@@ -787,26 +810,6 @@ export default function Brother() {
                         }}
                       >
                         Bilgilerimi Güncelle
-                      </Button>
-                    ) : null}
-                    {canEditProfile ? (
-                      <Button
-                        className="no-print"
-                        variant="outlined"
-                        startIcon={<PhotoCameraRoundedIcon />}
-                        onClick={onSelectPhoto}
-                        disabled={isPhotoUploading}
-                        sx={{
-                          textTransform: 'none',
-                          borderRadius: 2,
-                          fontFamily: 'Open Sans',
-                          fontWeight: 800,
-                          minHeight: 44,
-                          px: 2.2,
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        {isPhotoUploading ? 'Yükleniyor...' : 'Fotoğraf Güncelle'}
                       </Button>
                     ) : null}
                     {canDeleteAsKazim && !isAlreadyDeceased && !isRemovedFromList ? (
