@@ -69,6 +69,13 @@ const UserSchema = new mongoose.Schema({
   tlfGsmEvIs: {
     type: String
   },
+  photoExt: {
+    type: String,
+    default: 'jpg'
+  },
+  photoUrl: {
+    type: String
+  },
   listedeGorunsun: {
     type: Boolean,
     default: true
@@ -231,7 +238,7 @@ UserSchema.methods.toJSON = function () {
 
   const oObject = o.toObject();
 
-  return _.pick(oObject, ['_id', 'adSoyad', 'ePosta', 'matrikul', 'idaMatrikul', 'tekrisTarihi', 'dogumYeri', 'dogumTarihi', 'kanGrubu', 'meslegi', 'isi', 'medeniHali', 'esininAdi', 'dogumTarihi2', 'cocuklar', 'cocukBilgileri', 'dogumTarihleri', 'evAdresi', 'isAdresi', 'tlfGsmEvIs', 'listedeGorunsun', 'silinmeNedeni', 'silinmeTarihi', 'vefatEtti', 'ePosta', 'role']);
+  return _.pick(oObject, ['_id', 'adSoyad', 'ePosta', 'matrikul', 'idaMatrikul', 'tekrisTarihi', 'dogumYeri', 'dogumTarihi', 'kanGrubu', 'meslegi', 'isi', 'medeniHali', 'esininAdi', 'dogumTarihi2', 'cocuklar', 'cocukBilgileri', 'dogumTarihleri', 'evAdresi', 'isAdresi', 'tlfGsmEvIs', 'photoExt', 'photoUrl', 'listedeGorunsun', 'silinmeNedeni', 'silinmeTarihi', 'vefatEtti', 'ePosta', 'role']);
 };
 
 const User = mongoose.model('User', UserSchema);

@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
+const { BlobServiceClient } = require('@azure/storage-blob')
 
 const { User } = require('../models/user')
 
 const _ = require('lodash');
 
 const { authenticate } = require('../middleware/authenticate')
+const storageBaseUrl = 'https://idaimages.blob.core.windows.net'
+const storageFolder = 'matrikul'
+
+const buildPhotoUrl = (matrikul, ext) => `${storageBaseUrl}/${storageFolder}/${matrikul}.${ext}`
 
 router.get('/sample', async (req, res) => {
 
@@ -220,5 +225,63 @@ router.get('/users', authenticate, async (req, res) => {
 router.get('/user/me', authenticate, async (req, res) => {
 
 });
+
+router.post('/user/:_id/photo', authenticate, async (req, res) => {
+    const targetUser = await User.findById(req.params._id)
+    if (!targetUser) {
+        return res.status(404).send({ errorMessage: 'Kullanıcı bulunamadı.' })
+    }
+
+    const requesterEmail = String(req.user?.ePosta || '').trim().toLowerCase()
+    const isKazim = requesterEmail === 'kazim@pikselmutfak.com'
+    const isSelf = String(req.user?._id) === String(req.params._id)
+    if (!isKazim && !isSelf) {
+        return res.status(403).send({ errorMessage: 'Bu işlem için yetkiniz yok.' })
+    }
+
+    const imageDataUrl = String(req.body?.imageDataUrl || '').trim()
+    const matches = imageDataUrl.match(/^data:image\/(jpeg|jpg|png);base64,(.+)$/i)
+    if (!matches) {
+        return res.status(400).send({ errorMessage: 'Sadece JPG veya PNG formatında fotoğraf yüklenebilir.' })
+    }
+
+    const ext = matches[1].toLowerCase() === 'png' ? 'png' : 'jpg'
+    const base64Content = matches[2]
+
+    try {
+        const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING
+        if (!connectionString) {
+            return res.status(500).send({ errorMessage: 'AZURE_STORAGE_CONNECTION_STRING tanımlı değil.' })
+        }
+
+        const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString)
+        const containerClient = blobServiceClient.getContainerClient(storageFolder)
+        await containerClient.createIfNotExists()
+
+        const blobName = `${targetUser.matrikul}.${ext}`
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName)
+        const fileBuffer = Buffer.from(base64Content, 'base64')
+        await blockBlobClient.uploadData(fileBuffer, {
+            blobHTTPHeaders: {
+                blobContentType: ext === 'png' ? 'image/png' : 'image/jpeg'
+            }
+        })
+
+        const oldExt = targetUser.photoExt
+        if (oldExt && oldExt !== ext) {
+            const oldBlobClient = containerClient.getBlockBlobClient(`${targetUser.matrikul}.${oldExt}`)
+            await oldBlobClient.deleteIfExists()
+        }
+
+        targetUser.photoExt = ext
+        targetUser.photoUrl = buildPhotoUrl(targetUser.matrikul, ext)
+        targetUser.updatedAt = new Date()
+        await targetUser.save()
+
+        res.send(targetUser)
+    } catch (e) {
+        res.status(500).send({ errorMessage: 'Fotoğraf güncellenemedi.' })
+    }
+})
 
 module.exports = router;

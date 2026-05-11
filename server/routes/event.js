@@ -107,7 +107,7 @@ router.get('/events', authenticate, async (req, res) => {
 router.get('/events/:id', authenticate, async (req, res) => {
   try {
     const event = await Event.findById(req.params.id)
-      .populate('participants.user', 'adSoyad ePosta matrikul')
+      .populate('participants.user', 'adSoyad ePosta matrikul photoExt photoUrl')
     if (!event) {
       return res.status(404).send({ errorMessage: 'Etkinlik bulunamadı.' })
     }
@@ -190,7 +190,7 @@ router.post('/events/:id/join', authenticate, async (req, res) => {
 
     event.participants = normalizedParticipants
     await event.save()
-    event = await event.populate('participants.user', 'adSoyad ePosta matrikul')
+    event = await event.populate('participants.user', 'adSoyad ePosta matrikul photoExt photoUrl')
 
     res.send({
       ...event.toJSON(),
@@ -219,7 +219,7 @@ router.post('/events/:id/leave', authenticate, async (req, res) => {
 
     event.participants = normalizedParticipants
     await event.save()
-    event = await event.populate('participants.user', 'adSoyad ePosta matrikul')
+    event = await event.populate('participants.user', 'adSoyad ePosta matrikul photoExt photoUrl')
 
     res.send({
       ...event.toJSON(),

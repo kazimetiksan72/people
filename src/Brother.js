@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import axios from 'axios'
 import {
   Accordion,
   AccordionDetails,
@@ -41,6 +42,7 @@ import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import AddRoundedIcon from '@mui/icons-material/AddRounded'
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
+import PhotoCameraRoundedIcon from '@mui/icons-material/PhotoCameraRounded'
 
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useRedux } from './redux/hooks'
@@ -309,6 +311,9 @@ export default function Brother() {
   const [isDeceasedOpen, setIsDeceasedOpen] = useState(false)
   const [isMarkingDeceased, setIsMarkingDeceased] = useState(false)
   const [deceasedError, setDeceasedError] = useState('')
+  const [photoError, setPhotoError] = useState('')
+  const [isPhotoUploading, setIsPhotoUploading] = useState(false)
+  const photoInputRef = useRef(null)
   const [rawDateHints, setRawDateHints] = useState({
     dogumTarihi: '',
     dogumTarihi2: ''
@@ -374,7 +379,9 @@ export default function Brother() {
   const phoneDigits = normalizePhoneDigits(user.tlfGsmEvIs)
   const waNumber = getWhatsAppNumber(user.tlfGsmEvIs)
   const waLink = waNumber ? `https://wa.me/${waNumber}` : ''
-  const avatarSrc = `/images/${safeText(user.matrikul)}.jpg`
+  const avatarSrc = user.photoUrl
+    ? `${user.photoUrl}?v=${encodeURIComponent(user.updatedAt || '')}`
+    : `/images/${safeText(user.matrikul)}.${user.photoExt || 'jpg'}?v=${encodeURIComponent(user.updatedAt || '')}`
   const isAdmin = profile?.role === 'admin'
   const isOwnProfile = Boolean(profile?.matrikul) && String(profile.matrikul) === String(user.matrikul)
   const canEditProfile = isAdmin || isOwnProfile
@@ -510,6 +517,47 @@ export default function Brother() {
         navigate('/hicbir-k-olmez')
       }
     })
+  }
+
+  const onSelectPhoto = () => {
+    setPhotoError('')
+    if (photoInputRef.current) {
+      photoInputRef.current.value = ''
+      photoInputRef.current.click()
+    }
+  }
+
+  const onPhotoChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const isSupported = file.type === 'image/jpeg' || file.type === 'image/jpg' || file.type === 'image/png'
+    if (!isSupported) {
+      setPhotoError('Sadece JPG veya PNG formatında fotoğraf yükleyebilirsiniz.')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = async () => {
+      try {
+        setIsPhotoUploading(true)
+        setPhotoError('')
+        await axios.post(`/api/user/${user._id}/photo`, {
+          imageDataUrl: String(reader.result || '')
+        }, {
+          headers: {
+            xauth
+          }
+        })
+
+        getUsers({ callback: () => {} })
+      } catch (err) {
+        setPhotoError(err?.response?.data?.errorMessage || 'Fotoğraf güncellenemedi.')
+      } finally {
+        setIsPhotoUploading(false)
+      }
+    }
+    reader.readAsDataURL(file)
   }
 
   const sections = [
@@ -722,7 +770,7 @@ export default function Brother() {
                 </Box>
 
                 {canEditProfile || canDeleteAsKazim ? (
-                  <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
                     {canEditProfile ? (
                       <Button
                         className="no-print"
@@ -739,6 +787,26 @@ export default function Brother() {
                         }}
                       >
                         Bilgilerimi Güncelle
+                      </Button>
+                    ) : null}
+                    {canEditProfile ? (
+                      <Button
+                        className="no-print"
+                        variant="outlined"
+                        startIcon={<PhotoCameraRoundedIcon />}
+                        onClick={onSelectPhoto}
+                        disabled={isPhotoUploading}
+                        sx={{
+                          textTransform: 'none',
+                          borderRadius: 2,
+                          fontFamily: 'Open Sans',
+                          fontWeight: 800,
+                          minHeight: 44,
+                          px: 2.2,
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {isPhotoUploading ? 'Yükleniyor...' : 'Fotoğraf Güncelle'}
                       </Button>
                     ) : null}
                     {canDeleteAsKazim && !isAlreadyDeceased && !isRemovedFromList ? (
@@ -808,6 +876,18 @@ export default function Brother() {
                       {`Kardeşimiz ${separationDateText} tarihinde ${separationReasonText} sebebiyle aramızdan ayrılmıştır.`}
                     </Typography>
                   </Box>
+                ) : null}
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  style={{ display: 'none' }}
+                  onChange={onPhotoChange}
+                />
+                {photoError ? (
+                  <Alert severity="error" sx={{ mt: 1 }}>
+                    {photoError}
+                  </Alert>
                 ) : null}
               </Box>
             </Grid>

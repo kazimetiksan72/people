@@ -400,7 +400,7 @@ const NeverBrotherDies = () => {
                     <Avatar
                       variant="rounded"
                       alt={p.adSoyad}
-                      src={`./images/${p.matrikul}.jpg`}
+                      src={p.photoUrl || `./images/${p.matrikul}.${p.photoExt || 'jpg'}`}
                       sx={{
                         width: { xs: 54, md: 52 },
                         height: { xs: 54, md: 52 },

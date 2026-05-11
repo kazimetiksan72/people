@@ -573,7 +573,7 @@ const EventDetail = () => {
                   <Stack direction="row" spacing={1} alignItems="center">
                     <Avatar
                       variant="rounded"
-                      src={participant.user?.matrikul ? `/images/${participant.user.matrikul}.jpg` : ''}
+                      src={participant.user?.photoUrl || (participant.user?.matrikul ? `/images/${participant.user.matrikul}.${participant.user.photoExt || 'jpg'}` : '')}
                       alt={participant.user?.adSoyad || 'Profil'}
                       sx={{ width: 34, height: 34, borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)' }}
                     />
