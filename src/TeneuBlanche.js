@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import ReactPlayer from 'react-player'
 import { useRedux } from './redux/hooks'
 import { signOut } from './redux/requests'
 
@@ -28,6 +29,7 @@ import {
 } from '@mui/material'
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded'
 import EventRoundedIcon from '@mui/icons-material/EventRounded'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
@@ -54,6 +56,7 @@ const TeneuBlanche = () => {
   const [createOpen, setCreateOpen] = useState(false)
   const [createError, setCreateError] = useState('')
   const [eventDate, setEventDate] = useState('')
+  const [previewImage, setPreviewImage] = useState(null)
 
   const isKazim = String(profile?.ePosta || '').trim().toLowerCase() === 'kazim@pikselmutfak.com'
 
@@ -310,9 +313,40 @@ const TeneuBlanche = () => {
             {media.map((item) => (
               <Paper key={item._id || item.url} variant="outlined" sx={{ display: 'inline-block', width: '100%', mb: 1.2, overflow: 'hidden', borderRadius: 2, backgroundColor: '#fff' }}>
                 {item.type === 'video' ? (
-                  <Box component="video" src={item.url} controls preload="metadata" sx={{ width: '100%', display: 'block' }} />
+                  <Box sx={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', backgroundColor: '#0f172a' }}>
+                    <ReactPlayer
+                      src={item.url}
+                      controls
+                      width="100%"
+                      height="100%"
+                      style={{ position: 'absolute', inset: 0 }}
+                      config={{
+                        file: {
+                          attributes: {
+                            preload: 'metadata',
+                            playsInline: true
+                          }
+                        }
+                      }}
+                    />
+                  </Box>
                 ) : (
-                  <Box component="img" src={item.url} alt={item.fileName || selectedEvent.title} loading="lazy" sx={{ width: '100%', display: 'block' }} />
+                  <Box
+                    component="img"
+                    src={item.url}
+                    alt={item.fileName || selectedEvent.title}
+                    loading="lazy"
+                    onClick={() => setPreviewImage(item)}
+                    sx={{
+                      width: '100%',
+                      display: 'block',
+                      cursor: 'zoom-in',
+                      transition: '180ms ease',
+                      '&:hover': {
+                        filter: 'brightness(0.92)'
+                      }
+                    }}
+                  />
                 )}
               </Paper>
             ))}
@@ -412,6 +446,65 @@ const TeneuBlanche = () => {
             {isUploading ? 'Yükleniyor...' : 'Yükle'}
           </Button>
         </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(previewImage)}
+        onClose={() => setPreviewImage(null)}
+        maxWidth={false}
+        PaperProps={{
+          sx: {
+            position: 'relative',
+            m: { xs: 1.2, md: 3 },
+            p: 0,
+            borderRadius: 2,
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            overflow: 'visible'
+          }
+        }}
+        BackdropProps={{
+          sx: {
+            backgroundColor: 'rgba(0,0,0,0.72)'
+          }
+        }}
+      >
+        <IconButton
+          aria-label="Kapat"
+          onClick={() => setPreviewImage(null)}
+          sx={{
+            position: 'absolute',
+            right: -12,
+            top: -12,
+            zIndex: 2,
+            width: 38,
+            height: 38,
+            backgroundColor: '#fff',
+            color: '#111827',
+            boxShadow: '0 12px 30px rgba(0,0,0,0.28)',
+            '&:hover': {
+              backgroundColor: '#f3f4f6'
+            }
+          }}
+        >
+          <CloseRoundedIcon />
+        </IconButton>
+        {previewImage ? (
+          <Box
+            component="img"
+            src={previewImage.url}
+            alt={previewImage.fileName || 'Teneu Blanche görseli'}
+            sx={{
+              display: 'block',
+              maxWidth: 'min(92vw, 1180px)',
+              maxHeight: '86vh',
+              objectFit: 'contain',
+              borderRadius: 2,
+              backgroundColor: '#111827',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.45)'
+            }}
+          />
+        ) : null}
       </Dialog>
     </Box>
   )
