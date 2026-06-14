@@ -241,7 +241,7 @@ const TeneuBlanche = () => {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f7f9fc', py: 2 }}>
       <Box sx={{ width: '100%', maxWidth: 1340, mx: 'auto', px: { xs: 1.4, sm: 2.2, md: 3 } }}>
-        <Paper elevation={0} sx={{ position: 'sticky', top: 10, zIndex: 20, mb: 1.8, borderRadius: 3, border: '1px solid rgba(23,33,55,0.12)', backdropFilter: 'blur(12px)', background: 'rgba(255,255,255,0.72)', p: { xs: 1.2, md: 1.6 } }}>
+        <Paper elevation={0} sx={{ mb: 1.8, borderRadius: 3, border: '1px solid rgba(23,33,55,0.12)', backdropFilter: 'blur(12px)', background: 'rgba(255,255,255,0.72)', p: { xs: 1.2, md: 1.6 } }}>
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.2} alignItems={{ xs: 'stretch', md: 'center' }} justifyContent="space-between">
             <Stack direction="row" spacing={1} alignItems="center">
               <IconButton onClick={() => setMenuOpen(true)} sx={{ border: '1px solid rgba(23,33,55,0.18)', borderRadius: 2 }}>
@@ -309,9 +309,9 @@ const TeneuBlanche = () => {
         ) : media.length === 0 ? (
           <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}><Typography sx={{ ...fontStyle(700) }}>Bu etkinlik için henüz medya yüklenmemiş.</Typography></Paper>
         ) : (
-          <Box sx={{ columnCount: { xs: 1, sm: 2, md: 3, lg: 4 }, columnGap: 1.2 }}>
+          <Box sx={{ columnCount: { xs: 3, md: 3, lg: 4 }, columnGap: { xs: 0.7, md: 1.2 } }}>
             {media.map((item) => (
-              <Paper key={item._id || item.url} variant="outlined" sx={{ display: 'inline-block', width: '100%', mb: 1.2, overflow: 'hidden', borderRadius: 2, backgroundColor: '#fff' }}>
+              <Paper key={item._id || item.url} variant="outlined" sx={{ display: 'inline-block', width: '100%', mb: { xs: 0.7, md: 1.2 }, overflow: 'hidden', borderRadius: 2, backgroundColor: '#fff' }}>
                 {item.type === 'video' ? (
                   <Box sx={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', backgroundColor: '#0f172a' }}>
                     <ReactPlayer
