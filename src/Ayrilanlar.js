@@ -32,6 +32,7 @@ import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
 import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded'
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import { keyframes } from '@emotion/react'
 
 const printStyles = `
@@ -303,6 +304,15 @@ const Ayrilanlar = () => {
                 }}>
                   <ListItemIcon><AssignmentRoundedIcon /></ListItemIcon>
                   <ListItemText primary="Görevler" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => {
+                  setMenuOpen(false)
+                  navigate('/teneu-blanche')
+                }}>
+                  <ListItemIcon><AutoAwesomeRoundedIcon /></ListItemIcon>
+                  <ListItemText primary="Teneu Blanche" />
                 </ListItemButton>
               </ListItem>
             </List>

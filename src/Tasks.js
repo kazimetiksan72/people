@@ -26,6 +26,7 @@ import {
   Typography
 } from '@mui/material'
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import EventRoundedIcon from '@mui/icons-material/EventRounded'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
@@ -190,6 +191,7 @@ const Tasks = () => {
               <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/hicbir-k-olmez') }}><ListItemIcon><FavoriteRoundedIcon /></ListItemIcon><ListItemText primary="Hiçbir K. Ölmez" /></ListItemButton></ListItem>
               {canSeeAyrilanlar ? <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/ayrilanlar') }}><ListItemIcon><PersonRemoveRoundedIcon /></ListItemIcon><ListItemText primary="Ayrılanlar" /></ListItemButton></ListItem> : null}
               <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/tasks') }}><ListItemIcon><AssignmentRoundedIcon /></ListItemIcon><ListItemText primary="Görevler" /></ListItemButton></ListItem>
+              <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/teneu-blanche') }}><ListItemIcon><AutoAwesomeRoundedIcon /></ListItemIcon><ListItemText primary="Teneu Blanche" /></ListItemButton></ListItem>
             </List>
             <Box sx={{ flexGrow: 1 }} />
             <Button variant="contained" color="error" onClick={() => { setMenuOpen(false); signOut(); navigate('/signin', { replace: true }) }} sx={{ ...fontStyle(800), textTransform: 'none', borderRadius: 2, minHeight: 42, mx: 1, mb: 1 }}>Çıkış Yap</Button>
