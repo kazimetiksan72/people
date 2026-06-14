@@ -22,6 +22,10 @@ const TeneuBlancheMediaSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  uploadedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
   uploadedAt: {
     type: Date,
     default: Date.now
@@ -32,6 +36,11 @@ const TeneuBlancheSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
+    trim: true
+  },
+  description: {
+    type: String,
+    default: '',
     trim: true
   },
   eventDate: {

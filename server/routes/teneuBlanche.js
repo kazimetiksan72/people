@@ -26,19 +26,6 @@ const getMediaType = (mimeType = '') => {
   return ''
 }
 
-const formatTurkishDateTitle = (dateValue) => {
-  if (!dateValue) return 'Teneu Blanche'
-
-  const parsed = new Date(`${dateValue}T00:00:00`)
-  if (Number.isNaN(parsed.getTime())) return dateValue
-
-  return parsed.toLocaleDateString('tr-TR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
-}
-
 const getBlobClient = async () => {
   const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING
   if (!connectionString) {
@@ -56,7 +43,7 @@ router.get('/teneu-blanche', authenticate, async (req, res) => {
     const events = await TeneuBlanche.find({}).sort({ eventDate: -1, createdAt: -1 })
     res.send(events)
   } catch (e) {
-    res.status(500).send({ errorMessage: 'Teneu Blanche listesi alınamadı.' })
+    res.status(500).send({ errorMessage: 'Medya etkinlikleri alınamadı.' })
   }
 })
 
@@ -65,7 +52,13 @@ router.post('/teneu-blanche', authenticate, async (req, res) => {
     return res.status(403).send({ errorMessage: 'Bu işlem için yetkiniz yok.' })
   }
 
+  const title = String(req.body?.title || '').trim()
+  const description = String(req.body?.description || '').trim()
   const eventDate = String(req.body?.eventDate || '').trim()
+
+  if (!title) {
+    return res.status(400).send({ errorMessage: 'Etkinlik ismi zorunludur.' })
+  }
 
   if (!eventDate) {
     return res.status(400).send({ errorMessage: 'Etkinlik tarihi zorunludur.' })
@@ -80,7 +73,8 @@ router.post('/teneu-blanche', authenticate, async (req, res) => {
     }
 
     const event = new TeneuBlanche({
-      title: formatTurkishDateTitle(eventDate),
+      title,
+      description,
       eventDate,
       isDefault,
       createdBy: req.user._id,
@@ -90,19 +84,49 @@ router.post('/teneu-blanche', authenticate, async (req, res) => {
     await event.save()
     res.status(201).send(event)
   } catch (e) {
-    res.status(500).send({ errorMessage: 'Teneu Blanche oluşturulamadı.' })
+    res.status(500).send({ errorMessage: 'Medya etkinliği oluşturulamadı.' })
   }
 })
 
-router.post('/teneu-blanche/:id/media', authenticate, upload.array('files', 50), async (req, res) => {
+router.patch('/teneu-blanche/:id', authenticate, async (req, res) => {
   if (!isKazim(req.user)) {
     return res.status(403).send({ errorMessage: 'Bu işlem için yetkiniz yok.' })
   }
 
+  const title = String(req.body?.title || '').trim()
+  const description = String(req.body?.description || '').trim()
+  const eventDate = String(req.body?.eventDate || '').trim()
+
+  if (!title) {
+    return res.status(400).send({ errorMessage: 'Etkinlik ismi zorunludur.' })
+  }
+
+  if (!eventDate) {
+    return res.status(400).send({ errorMessage: 'Etkinlik tarihi zorunludur.' })
+  }
+
+  try {
+    const event = await TeneuBlanche.findByIdAndUpdate(
+      req.params.id,
+      { $set: { title, description, eventDate } },
+      { new: true }
+    )
+
+    if (!event) {
+      return res.status(404).send({ errorMessage: 'Medya etkinliği bulunamadı.' })
+    }
+
+    res.send(event)
+  } catch (e) {
+    res.status(500).send({ errorMessage: 'Medya etkinliği güncellenemedi.' })
+  }
+})
+
+router.post('/teneu-blanche/:id/media', authenticate, upload.array('files', 50), async (req, res) => {
   try {
     const event = await TeneuBlanche.findById(req.params.id)
     if (!event) {
-      return res.status(404).send({ errorMessage: 'Teneu Blanche bulunamadı.' })
+      return res.status(404).send({ errorMessage: 'Medya etkinliği bulunamadı.' })
     }
 
     const files = Array.isArray(req.files) ? req.files : []
@@ -132,7 +156,8 @@ router.post('/teneu-blanche/:id/media', authenticate, upload.array('files', 50),
         url: `${STORAGE_BASE_URL}/${CONTAINER_NAME}/${blobName}`,
         blobName,
         fileName: file.originalname || '',
-        contentType: file.mimetype || ''
+        contentType: file.mimetype || '',
+        uploadedBy: req.user._id
       })
     }
 
@@ -146,6 +171,51 @@ router.post('/teneu-blanche/:id/media', authenticate, upload.array('files', 50),
   } catch (e) {
     console.log('POST /teneu-blanche/:id/media error', e)
     res.status(500).send({ errorMessage: 'Medya yüklenemedi.' })
+  }
+})
+
+router.delete('/teneu-blanche/:id/media', authenticate, async (req, res) => {
+  try {
+    const mediaIds = Array.isArray(req.body?.mediaIds)
+      ? req.body.mediaIds.map((id) => String(id)).filter(Boolean)
+      : []
+
+    if (mediaIds.length === 0) {
+      return res.status(400).send({ errorMessage: 'Silinecek medya seçilmedi.' })
+    }
+
+    const event = await TeneuBlanche.findById(req.params.id)
+    if (!event) {
+      return res.status(404).send({ errorMessage: 'Medya etkinliği bulunamadı.' })
+    }
+
+    const selectedMedia = event.media.filter((item) => mediaIds.includes(String(item._id)))
+    const mediaToDelete = selectedMedia.filter((item) => {
+      return isKazim(req.user) || String(item.uploadedBy || '') === String(req.user._id)
+    })
+
+    if (selectedMedia.length !== mediaToDelete.length) {
+      return res.status(403).send({ errorMessage: 'Sadece kendi yüklediğiniz medyaları silebilirsiniz.' })
+    }
+
+    if (mediaToDelete.length === 0) {
+      return res.status(404).send({ errorMessage: 'Seçilen medya bulunamadı.' })
+    }
+
+    const containerClient = await getBlobClient()
+
+    for (const media of mediaToDelete) {
+      if (!media.blobName) continue
+      await containerClient.getBlockBlobClient(media.blobName).deleteIfExists()
+    }
+
+    event.media = event.media.filter((item) => !mediaIds.includes(String(item._id)))
+    await event.save()
+
+    res.send(event)
+  } catch (e) {
+    console.log('DELETE /teneu-blanche/:id/media error', e)
+    res.status(500).send({ errorMessage: 'Medya silinemedi.' })
   }
 })
 

@@ -509,10 +509,10 @@ const Events = () => {
             <ListItem disablePadding>
               <ListItemButton onClick={() => {
                 setMenuOpen(false)
-                navigate('/teneu-blanche')
+                navigate('/medya')
               }}>
                 <ListItemIcon><AutoAwesomeRoundedIcon /></ListItemIcon>
-                <ListItemText primary="Teneu Blanche" />
+                <ListItemText primary="Medya" />
               </ListItemButton>
             </ListItem>
           </List>

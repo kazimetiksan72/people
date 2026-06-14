@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import {BrowserRouter, Routes, Route} from 'react-router-dom'
+import {BrowserRouter, Navigate, Routes, Route} from 'react-router-dom'
 import { useEffect } from 'react'
 
 import {
@@ -21,7 +21,7 @@ import Security from './Security'
 import NeverBrotherDies from './NeverBrotherDies'
 import Ayrilanlar from './Ayrilanlar'
 import Tasks from './Tasks'
-import TeneuBlanche from './TeneuBlanche'
+import Media from './Media'
 
 const App = () => {
 
@@ -47,7 +47,9 @@ const App = () => {
             <Route path='/hicbir-k-olmez' element={<NeverBrotherDies />} />
             <Route path='/ayrilanlar' element={<Ayrilanlar />} />
             <Route path='/tasks' element={<Tasks />} />
-            <Route path='/teneu-blanche' element={<TeneuBlanche />} />
+            <Route path='/medya' element={<Media />} />
+            <Route path='/medya/:id' element={<Media />} />
+            <Route path='/teneu-blanche' element={<Navigate to='/medya' replace />} />
             <Route path='/brother/:matrikul' element={<Brother />} />
             <Route path='/signin' element={<SignIn />} />
             <Route path='*' element={<SignIn />} />
