@@ -137,6 +137,15 @@ const Security = () => {
               <ListItem disablePadding>
                 <ListItemButton onClick={() => {
                   setMenuOpen(false)
+                  navigate('/medya')
+                }}>
+                  <ListItemIcon><AutoAwesomeRoundedIcon /></ListItemIcon>
+                  <ListItemText primary="Medya" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => {
+                  setMenuOpen(false)
                   navigate('/events')
                 }}>
                   <ListItemIcon><EventRoundedIcon /></ListItemIcon>
@@ -179,15 +188,6 @@ const Security = () => {
                 }}>
                   <ListItemIcon><AssignmentRoundedIcon /></ListItemIcon>
                   <ListItemText primary="Görevler" />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => {
-                  setMenuOpen(false)
-                  navigate('/medya')
-                }}>
-                  <ListItemIcon><AutoAwesomeRoundedIcon /></ListItemIcon>
-                  <ListItemText primary="Medya" />
                 </ListItemButton>
               </ListItem>
             </List>

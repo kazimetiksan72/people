@@ -344,14 +344,72 @@ const Media = () => {
       <Box sx={{ width: 280, p: 1.2, height: '100%', display: 'flex', flexDirection: 'column' }} role="presentation">
         <Typography sx={{ ...fontStyle(900), fontSize: 19, px: 1.2, py: 0.8 }}>Menü</Typography>
         <List>
-          <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/') }}><ListItemIcon><PeopleAltRoundedIcon /></ListItemIcon><ListItemText primary="Kardeşler" /></ListItemButton></ListItem>
-          <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/events') }}><ListItemIcon><EventRoundedIcon /></ListItemIcon><ListItemText primary="Etkinlikler" /></ListItemButton></ListItem>
-          <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/tasks') }}><ListItemIcon><AssignmentRoundedIcon /></ListItemIcon><ListItemText primary="Görevler" /></ListItemButton></ListItem>
-          <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/medya') }}><ListItemIcon><AutoAwesomeRoundedIcon /></ListItemIcon><ListItemText primary="Medya" /></ListItemButton></ListItem>
-          <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/security') }}><ListItemIcon><SecurityRoundedIcon /></ListItemIcon><ListItemText primary="Güvenlik" /></ListItemButton></ListItem>
-          <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/hicbir-k-olmez') }}><ListItemIcon><FavoriteRoundedIcon /></ListItemIcon><ListItemText primary="Hiçbir K. Ölmez" /></ListItemButton></ListItem>
-          {isKazim ? <ListItem disablePadding><ListItemButton onClick={() => { setMenuOpen(false); navigate('/ayrilanlar') }}><ListItemIcon><PersonRemoveRoundedIcon /></ListItemIcon><ListItemText primary="Ayrılanlar" /></ListItemButton></ListItem> : null}
-        </List>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => {
+              setMenuOpen(false)
+              navigate('/')
+            }}>
+              <ListItemIcon><PeopleAltRoundedIcon /></ListItemIcon>
+              <ListItemText primary="Kardeşler" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => {
+              setMenuOpen(false)
+              navigate('/medya')
+            }}>
+              <ListItemIcon><AutoAwesomeRoundedIcon /></ListItemIcon>
+              <ListItemText primary="Medya" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => {
+              setMenuOpen(false)
+              navigate('/events')
+            }}>
+              <ListItemIcon><EventRoundedIcon /></ListItemIcon>
+              <ListItemText primary="Etkinlikler" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => {
+              setMenuOpen(false)
+              navigate('/security')
+            }}>
+              <ListItemIcon><SecurityRoundedIcon /></ListItemIcon>
+              <ListItemText primary="Güvenlik" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => {
+              setMenuOpen(false)
+              navigate('/hicbir-k-olmez')
+            }}>
+              <ListItemIcon><FavoriteRoundedIcon /></ListItemIcon>
+              <ListItemText primary="Hiçbir K. Ölmez" />
+            </ListItemButton>
+          </ListItem>
+          {isKazim ? (
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => {
+                setMenuOpen(false)
+                navigate('/ayrilanlar')
+              }}>
+                <ListItemIcon><PersonRemoveRoundedIcon /></ListItemIcon>
+                <ListItemText primary="Ayrılanlar" />
+              </ListItemButton>
+            </ListItem>
+          ) : null}
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => {
+              setMenuOpen(false)
+              navigate('/tasks')
+            }}>
+              <ListItemIcon><AssignmentRoundedIcon /></ListItemIcon>
+              <ListItemText primary="Görevler" />
+            </ListItemButton>
+          </ListItem>
+            </List>
         <Box sx={{ flexGrow: 1 }} />
         <Button variant="contained" color="error" onClick={() => { setMenuOpen(false); signOut(); navigate('/signin', { replace: true }) }} sx={{ ...fontStyle(800), textTransform: 'none', borderRadius: 2, minHeight: 42, mx: 1, mb: 1 }}>Çıkış Yap</Button>
       </Box>
