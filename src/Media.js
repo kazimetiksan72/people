@@ -33,7 +33,6 @@ import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
-import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded'
 import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import EventRoundedIcon from '@mui/icons-material/EventRounded'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
@@ -340,35 +339,6 @@ const Media = () => {
     }
   }
 
-  const downloadPreviewImage = async () => {
-    if (!previewImage?.url) return
-
-    const fallbackOpen = () => {
-      window.open(previewImage.url, '_blank', 'noopener,noreferrer')
-    }
-
-    try {
-      const response = await fetch(previewImage.url)
-      if (!response.ok) {
-        fallbackOpen()
-        return
-      }
-
-      const blob = await response.blob()
-      const blobUrl = URL.createObjectURL(blob)
-      const fileName = String(previewImage.fileName || 'medya-gorseli.jpg').replace(/[\\/:*?"<>|]+/g, '-')
-      const link = document.createElement('a')
-      link.href = blobUrl
-      link.download = fileName
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      URL.revokeObjectURL(blobUrl)
-    } catch (e) {
-      fallbackOpen()
-    }
-  }
-
   const drawer = (
     <Drawer anchor="left" open={menuOpen} onClose={() => setMenuOpen(false)}>
       <Box sx={{ width: 280, p: 1.2, height: '100%', display: 'flex', flexDirection: 'column' }} role="presentation">
@@ -608,6 +578,7 @@ const Media = () => {
             >
               <CloudUploadRoundedIcon sx={{ fontSize: 46, color: '#2563eb', mb: 1 }} />
               <Typography sx={{ ...fontStyle(900), fontSize: 18 }}>Fotoğraf ve videoları buraya sürükle bırak</Typography>
+              <Typography sx={{ ...fontStyle(600), color: '#64748b', mt: 0.5, mb: 2 }}>Fotoğrafları telefonunuzdan seçip yükleyebilirsiniz.</Typography>
               <Button variant="outlined" onClick={onPickFiles} disabled={isUploading} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800) }}>Dosya Seç</Button>
             </Box>
 
@@ -666,28 +637,7 @@ const Media = () => {
           <CloseRoundedIcon />
         </IconButton>
         {previewImage ? (
-          <>
-            <Box component="img" src={previewImage.url} alt={previewImage.fileName || 'Medya görseli'} sx={{ display: 'block', maxWidth: 'min(92vw, 1180px)', maxHeight: '86vh', objectFit: 'contain', borderRadius: 2, backgroundColor: '#111827', boxShadow: '0 24px 80px rgba(0,0,0,0.45)' }} />
-            <Button
-              variant="contained"
-              startIcon={<DownloadRoundedIcon />}
-              onClick={downloadPreviewImage}
-              sx={{
-                position: 'absolute',
-                left: '50%',
-                bottom: { xs: -56, md: -62 },
-                transform: 'translateX(-50%)',
-                borderRadius: 99,
-                px: 2.2,
-                minHeight: 42,
-                whiteSpace: 'nowrap',
-                textTransform: 'none',
-                ...fontStyle(900)
-              }}
-            >
-              Telefonuma Kaydet
-            </Button>
-          </>
+          <Box component="img" src={previewImage.url} alt={previewImage.fileName || 'Medya görseli'} sx={{ display: 'block', maxWidth: 'min(92vw, 1180px)', maxHeight: '86vh', objectFit: 'contain', borderRadius: 2, backgroundColor: '#111827', boxShadow: '0 24px 80px rgba(0,0,0,0.45)' }} />
         ) : null}
       </Dialog>
     </Box>
