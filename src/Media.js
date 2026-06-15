@@ -578,7 +578,6 @@ const Media = () => {
             >
               <CloudUploadRoundedIcon sx={{ fontSize: 46, color: '#2563eb', mb: 1 }} />
               <Typography sx={{ ...fontStyle(900), fontSize: 18 }}>Fotoğraf ve videoları buraya sürükle bırak</Typography>
-              <Typography sx={{ ...fontStyle(600), color: '#64748b', mt: 0.5, mb: 2 }}>Seçilen medyalar Azure Storage üzerindeki teneublanche containerına yüklenecek.</Typography>
               <Button variant="outlined" onClick={onPickFiles} disabled={isUploading} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800) }}>Dosya Seç</Button>
             </Box>
 
