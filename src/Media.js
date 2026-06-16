@@ -89,6 +89,7 @@ const Media = () => {
 
   const profileEmail = String(profile?.ePosta || '').trim().toLowerCase()
   const isKazim = profileEmail === 'kazim@pikselmutfak.com'
+  const isReadonly = profile?.role === 'readonly'
   const isDetail = Boolean(eventId)
 
   const fetchEvents = useCallback(async () => {
@@ -123,8 +124,9 @@ const Media = () => {
     return Array.isArray(selectedEvent?.media) ? selectedEvent.media : []
   }, [selectedEvent])
   const canDeleteMedia = useCallback((item) => {
+    if (isReadonly) return false
     return isKazim || String(item?.uploadedBy || '') === String(profile?._id || '')
-  }, [isKazim, profile?._id])
+  }, [isKazim, isReadonly, profile?._id])
 
   const deletableMediaCount = useMemo(() => {
     return media.filter((item) => canDeleteMedia(item)).length
@@ -453,12 +455,16 @@ const Media = () => {
                   Düzenle
                 </Button>
               ) : null}
-              <Button variant="contained" startIcon={<CloudUploadRoundedIcon />} onClick={openUploadDialog} disabled={!eventId || isUploading} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800) }}>
-                {isUploading ? 'Yükleniyor...' : 'Medya Yükle'}
-              </Button>
-              <Button variant={selectMode ? 'contained' : 'outlined'} onClick={() => selectMode ? closeSelectMode() : setSelectMode(true)} disabled={!eventId || deletableMediaCount === 0 || isDeletingMedia} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800) }}>
-                {selectMode ? 'Vazgeç' : 'Seç'}
-              </Button>
+              {!isReadonly ? (
+                <Button variant="contained" startIcon={<CloudUploadRoundedIcon />} onClick={openUploadDialog} disabled={!eventId || isUploading} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800) }}>
+                  {isUploading ? 'Yükleniyor...' : 'Medya Yükle'}
+                </Button>
+              ) : null}
+              {!isReadonly ? (
+                <Button variant={selectMode ? 'contained' : 'outlined'} onClick={() => selectMode ? closeSelectMode() : setSelectMode(true)} disabled={!eventId || deletableMediaCount === 0 || isDeletingMedia} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800) }}>
+                  {selectMode ? 'Vazgeç' : 'Seç'}
+                </Button>
+              ) : null}
               {selectMode ? (
                 <Button color="error" variant="contained" startIcon={<DeleteRoundedIcon />} onClick={() => setDeleteConfirmOpen(true)} disabled={selectedMediaIds.length === 0 || isDeletingMedia} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800) }}>
                   Sil ({selectedMediaIds.length})

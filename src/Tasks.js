@@ -93,7 +93,7 @@ const Tasks = () => {
     fetchTasks()
   }, [fetchTasks])
 
-  const assignableUsers = useMemo(() => users.filter((u) => u.listedeGorunsun !== false && !u.vefatEtti), [users])
+  const assignableUsers = useMemo(() => users.filter((u) => !u.loginOnly && u.listedeGorunsun !== false && !u.vefatEtti), [users])
 
   if (!xauth) return <Navigate to="/signin" replace />
 

@@ -130,6 +130,7 @@ const EventDetail = () => {
   const hasCoordinates = Number.isFinite(latitude) && Number.isFinite(longitude)
   const eventClosed = isEventClosed(event?.date, event?.time)
   const canSeeAyrilanlar = String(profile?.ePosta || '').trim().toLowerCase() === 'kazim@pikselmutfak.com'
+  const isReadonly = profile?.role === 'readonly'
 
   const fontStyle = (weight) => ({
     fontFamily: 'Open Sans',
@@ -163,6 +164,7 @@ const EventDetail = () => {
   }, [xauth, id])
 
   const onJoin = () => {
+    if (isReadonly) return
     if (!id || joinLoading || eventClosed) {
       if (eventClosed) setJoinError('Etkinlik tarihi/saati geçtiği için katılım değiştirilemez.')
       return
@@ -191,6 +193,7 @@ const EventDetail = () => {
   }
 
   const onLeave = () => {
+    if (isReadonly) return
     if (!id || joinLoading || !isJoined || eventClosed) {
       if (eventClosed) setJoinError('Etkinlik tarihi/saati geçtiği için katılım değiştirilemez.')
       return
@@ -464,38 +467,40 @@ const EventDetail = () => {
             </Paper>
           </Box>
 
-          {joinError ? (
+          {!isReadonly && joinError ? (
             <Typography sx={{ ...fontStyle(700), color: 'error.main', fontSize: 13 }}>
               {joinError}
             </Typography>
           ) : null}
-          {eventClosed ? (
+          {!isReadonly && eventClosed ? (
             <Typography sx={{ ...fontStyle(700), color: 'warning.main', fontSize: 13 }}>
               Etkinlik tarihi/saati geçtiği için katılım durumu değiştirilemez.
             </Typography>
           ) : null}
 
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-            <Button
-              variant="contained"
-              onClick={() => setJoinDialogOpen(true)}
-              disabled={joinLoading || eventClosed}
-              sx={{
-                textTransform: 'none',
-                borderRadius: 2,
-                minHeight: 44,
-                fontFamily: 'Open Sans',
-                fontWeight: 800,
-                flex: 1,
-                width: { xs: '100%', sm: 'auto' }
-              }}
-            >
-              {joinLoading ? 'Kaydediliyor...' : isJoined
-                ? `Katılımı Güncelle (Misafir: ${guestCount})`
-                : 'Katılıyorum'}
-            </Button>
+            {!isReadonly ? (
+              <Button
+                variant="contained"
+                onClick={() => setJoinDialogOpen(true)}
+                disabled={joinLoading || eventClosed}
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: 2,
+                  minHeight: 44,
+                  fontFamily: 'Open Sans',
+                  fontWeight: 800,
+                  flex: 1,
+                  width: { xs: '100%', sm: 'auto' }
+                }}
+              >
+                {joinLoading ? 'Kaydediliyor...' : isJoined
+                  ? `Katılımı Güncelle (Misafir: ${guestCount})`
+                  : 'Katılıyorum'}
+              </Button>
+            ) : null}
 
-            {isJoined ? (
+            {!isReadonly && isJoined ? (
               <Button
                 variant="outlined"
                 color="error"

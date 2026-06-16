@@ -103,7 +103,7 @@ const Ayrilanlar = () => {
   }, [xauth, users.length])
 
   const leftUsers = useMemo(() => {
-    return users.filter((u) => u.listedeGorunsun === false)
+    return users.filter((u) => !u.loginOnly && u.listedeGorunsun === false)
   }, [users])
 
   const sortedUsers = useMemo(() => {

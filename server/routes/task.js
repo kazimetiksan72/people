@@ -10,6 +10,7 @@ const { authenticate } = require('../middleware/authenticate')
 const ADMIN_EMAIL = 'kazim@pikselmutfak.com'
 
 const isKazim = (user) => String(user?.ePosta || '').trim().toLowerCase() === ADMIN_EMAIL
+const isReadonlyUser = (user) => user?.role === 'readonly'
 
 router.get('/tasks', authenticate, async (req, res) => {
   try {
@@ -24,6 +25,10 @@ router.get('/tasks', authenticate, async (req, res) => {
 
 router.post('/tasks', authenticate, async (req, res) => {
   try {
+    if (isReadonlyUser(req.user)) {
+      return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar değişiklik yapamaz.' })
+    }
+
     if (!isKazim(req.user)) {
       return res.status(403).send({ errorMessage: 'Bu işlem için yetkiniz yok.' })
     }
@@ -66,6 +71,10 @@ router.post('/tasks', authenticate, async (req, res) => {
 })
 
 router.post('/tasks/:id/accept', authenticate, async (req, res) => {
+  if (isReadonlyUser(req.user)) {
+    return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar görev durumunu değiştiremez.' })
+  }
+
   const task = await Task.findById(req.params.id)
   if (!task) {
     return res.status(404).send({ errorMessage: 'Görev bulunamadı.' })
@@ -83,6 +92,10 @@ router.post('/tasks/:id/accept', authenticate, async (req, res) => {
 })
 
 router.post('/tasks/:id/reject', authenticate, async (req, res) => {
+  if (isReadonlyUser(req.user)) {
+    return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar görev durumunu değiştiremez.' })
+  }
+
   const task = await Task.findById(req.params.id)
   if (!task) {
     return res.status(404).send({ errorMessage: 'Görev bulunamadı.' })
@@ -105,6 +118,10 @@ router.post('/tasks/:id/reject', authenticate, async (req, res) => {
 })
 
 router.post('/tasks/:id/complete', authenticate, async (req, res) => {
+  if (isReadonlyUser(req.user)) {
+    return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar görev durumunu değiştiremez.' })
+  }
+
   const task = await Task.findById(req.params.id)
   if (!task) {
     return res.status(404).send({ errorMessage: 'Görev bulunamadı.' })

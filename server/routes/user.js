@@ -11,6 +11,7 @@ const storageBaseUrl = 'https://idaimages.blob.core.windows.net'
 const storageFolder = 'matrikul'
 
 const buildPhotoUrl = (matrikul, ext) => `${storageBaseUrl}/${storageFolder}/${matrikul}.${ext}`
+const isReadonlyUser = (user) => user?.role === 'readonly'
 
 router.get('/sample', async (req, res) => {
 
@@ -84,6 +85,9 @@ router.post('/signup', async (req, res) => {
 })
 
 router.post('/user/me/change-password', authenticate, async (req, res) => {
+    if (isReadonlyUser(req.user)) {
+        return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar değişiklik yapamaz.' })
+    }
 
     const body = _.pick(req.body, ['currentPassword', 'newPassword'])
     const currentPassword = String(body.currentPassword || '')
@@ -159,6 +163,9 @@ router.post('/user/:_id/deceased', authenticate, async (req, res) => {
 })
 
 router.patch('/user/:_id', authenticate, async (req, res) => {
+    if (isReadonlyUser(req.user)) {
+        return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar değişiklik yapamaz.' })
+    }
 
     const isAdmin = req.user?.role === 'admin'
     const isSelf = String(req.user?._id) === String(req.params._id)
@@ -227,6 +234,10 @@ router.get('/user/me', authenticate, async (req, res) => {
 });
 
 router.post('/user/:_id/photo', authenticate, async (req, res) => {
+    if (isReadonlyUser(req.user)) {
+        return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar fotoğraf yükleyemez.' })
+    }
+
     const targetUser = await User.findById(req.params._id)
     if (!targetUser) {
         return res.status(404).send({ errorMessage: 'Kullanıcı bulunamadı.' })

@@ -19,6 +19,7 @@ const CONTAINER_NAME = 'teneublanche'
 const STORAGE_BASE_URL = 'https://idaimages.blob.core.windows.net'
 
 const isKazim = (user) => String(user?.ePosta || '').trim().toLowerCase() === ADMIN_EMAIL
+const isReadonlyUser = (user) => user?.role === 'readonly'
 
 const getMediaType = (mimeType = '') => {
   if (mimeType.startsWith('image/')) return 'image'
@@ -48,6 +49,10 @@ router.get('/teneu-blanche', authenticate, async (req, res) => {
 })
 
 router.post('/teneu-blanche', authenticate, async (req, res) => {
+  if (isReadonlyUser(req.user)) {
+    return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar değişiklik yapamaz.' })
+  }
+
   if (!isKazim(req.user)) {
     return res.status(403).send({ errorMessage: 'Bu işlem için yetkiniz yok.' })
   }
@@ -89,6 +94,10 @@ router.post('/teneu-blanche', authenticate, async (req, res) => {
 })
 
 router.patch('/teneu-blanche/:id', authenticate, async (req, res) => {
+  if (isReadonlyUser(req.user)) {
+    return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar değişiklik yapamaz.' })
+  }
+
   if (!isKazim(req.user)) {
     return res.status(403).send({ errorMessage: 'Bu işlem için yetkiniz yok.' })
   }
@@ -123,6 +132,10 @@ router.patch('/teneu-blanche/:id', authenticate, async (req, res) => {
 })
 
 router.post('/teneu-blanche/:id/media', authenticate, upload.array('files', 50), async (req, res) => {
+  if (isReadonlyUser(req.user)) {
+    return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar medya yükleyemez.' })
+  }
+
   try {
     const event = await TeneuBlanche.findById(req.params.id)
     if (!event) {
@@ -175,6 +188,10 @@ router.post('/teneu-blanche/:id/media', authenticate, upload.array('files', 50),
 })
 
 router.delete('/teneu-blanche/:id/media', authenticate, async (req, res) => {
+  if (isReadonlyUser(req.user)) {
+    return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar medya silemez.' })
+  }
+
   try {
     const mediaIds = Array.isArray(req.body?.mediaIds)
       ? req.body.mediaIds.map((id) => String(id)).filter(Boolean)

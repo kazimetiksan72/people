@@ -5,6 +5,7 @@ const { Event } = require('../models/event')
 const { authenticate } = require('../middleware/authenticate')
 
 const router = express.Router()
+const isReadonlyUser = (user) => user?.role === 'readonly'
 
 const clampGuestCount = (value) => {
   const n = Number(value)
@@ -129,6 +130,10 @@ router.get('/events/:id', authenticate, async (req, res) => {
 })
 
 router.post('/events', authenticate, async (req, res) => {
+  if (isReadonlyUser(req.user)) {
+    return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar değişiklik yapamaz.' })
+  }
+
   if (req.user?.role !== 'admin') {
     return res.status(403).send({ errorMessage: 'Etkinlik oluşturma yetkisi sadece admin kullanıcıdadır.' })
   }
@@ -164,6 +169,10 @@ router.post('/events', authenticate, async (req, res) => {
 })
 
 router.post('/events/:id/join', authenticate, async (req, res) => {
+  if (isReadonlyUser(req.user)) {
+    return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar katılım bilgisi değiştiremez.' })
+  }
+
   try {
     const guestCount = clampGuestCount(req.body.guestCount)
     let event = await Event.findById(req.params.id)
@@ -204,6 +213,10 @@ router.post('/events/:id/join', authenticate, async (req, res) => {
 })
 
 router.post('/events/:id/leave', authenticate, async (req, res) => {
+  if (isReadonlyUser(req.user)) {
+    return res.status(403).send({ errorMessage: 'Salt okunur kullanıcılar katılım bilgisi değiştiremez.' })
+  }
+
   try {
     let event = await Event.findById(req.params.id)
     if (!event) {
