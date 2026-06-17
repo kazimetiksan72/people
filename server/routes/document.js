@@ -5,6 +5,7 @@ const { BlobServiceClient } = require('@azure/storage-blob')
 
 const { authenticate } = require('../middleware/authenticate')
 const { Document } = require('../models/document')
+const { normalizeUploadFileName, sanitizeFileName } = require('../utils/fileName')
 
 const router = express.Router()
 const upload = multer({
@@ -29,6 +30,11 @@ const canViewDocument = (user, document) => {
   return getUserDegree(user) >= Number(document?.degree || 0)
 }
 
+const getRenamedFileName = (currentFileName, nextTitle) => {
+  const ext = path.extname(String(currentFileName || ''))
+  return `${nextTitle}${ext}`
+}
+
 const getContainerClient = async () => {
   const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING
   if (!connectionString) {
@@ -44,10 +50,6 @@ const getContainerClient = async () => {
 const isAllowedDocument = (file = {}) => {
   const ext = path.extname(String(file.originalname || '')).toLowerCase()
   return ALLOWED_EXTENSIONS.has(ext)
-}
-
-const sanitizeFileName = (fileName) => {
-  return String(fileName || 'dokuman').replace(/[^\w.\-ğüşöçıİĞÜŞÖÇ]+/gi, '-')
 }
 
 const serializeDocument = (document) => ({
@@ -98,7 +100,8 @@ router.post('/documents', authenticate, upload.array('files', 20), async (req, r
     const uploadedDocuments = []
 
     for (const file of files) {
-      const safeName = sanitizeFileName(file.originalname)
+      const originalName = normalizeUploadFileName(file.originalname, 'dokuman')
+      const safeName = sanitizeFileName(originalName, 'dokuman')
       const blobName = `${degree}/${Date.now()}-${Math.random().toString(16).slice(2)}-${safeName}`
       const blockBlobClient = containerClient.getBlockBlobClient(blobName)
 
@@ -109,10 +112,10 @@ router.post('/documents', authenticate, upload.array('files', 20), async (req, r
       })
 
       const document = await Document.create({
-        title: path.basename(file.originalname || safeName, path.extname(file.originalname || safeName)),
+        title: path.basename(originalName || safeName, path.extname(originalName || safeName)),
         degree,
         blobName,
-        fileName: file.originalname || safeName,
+        fileName: originalName || safeName,
         contentType: file.mimetype || 'application/octet-stream',
         size: file.size || 0,
         uploadedBy: req.user._id
@@ -125,6 +128,63 @@ router.post('/documents', authenticate, upload.array('files', 20), async (req, r
   } catch (e) {
     console.log('POST /documents error', e)
     res.status(500).send({ errorMessage: 'Doküman yüklenemedi.' })
+  }
+})
+
+router.put('/documents/:id', authenticate, async (req, res) => {
+  if (!isKazim(req.user)) {
+    return res.status(403).send({ errorMessage: 'Doküman düzenleme yetkisi sadece yetkili kullanıcıdadır.' })
+  }
+
+  const title = normalizeUploadFileName(req.body?.title, '').trim()
+  const degree = String(req.body?.degree || '').trim()
+
+  if (!title) {
+    return res.status(400).send({ errorMessage: 'Doküman ismi zorunludur.' })
+  }
+
+  if (!['1', '2', '3'].includes(degree)) {
+    return res.status(400).send({ errorMessage: 'Doküman derecesi zorunludur.' })
+  }
+
+  try {
+    const document = await Document.findById(req.params.id)
+    if (!document) {
+      return res.status(404).send({ errorMessage: 'Doküman bulunamadı.' })
+    }
+
+    document.title = title
+    document.degree = degree
+    document.fileName = getRenamedFileName(document.fileName, title)
+    await document.save()
+
+    res.send(serializeDocument(document))
+  } catch (e) {
+    console.log('PUT /documents/:id error', e)
+    res.status(500).send({ errorMessage: 'Doküman güncellenemedi.' })
+  }
+})
+
+router.delete('/documents/:id', authenticate, async (req, res) => {
+  if (!isKazim(req.user)) {
+    return res.status(403).send({ errorMessage: 'Doküman silme yetkisi sadece yetkili kullanıcıdadır.' })
+  }
+
+  try {
+    const document = await Document.findById(req.params.id)
+    if (!document) {
+      return res.status(404).send({ errorMessage: 'Doküman bulunamadı.' })
+    }
+
+    const containerClient = await getContainerClient()
+    const blobClient = containerClient.getBlockBlobClient(document.blobName)
+    await blobClient.deleteIfExists()
+    await document.deleteOne()
+
+    res.send({ success: true })
+  } catch (e) {
+    console.log('DELETE /documents/:id error', e)
+    res.status(500).send({ errorMessage: 'Doküman silinemedi.' })
   }
 })
 

@@ -29,7 +29,9 @@ import {
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded'
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded'
+import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import EventRoundedIcon from '@mui/icons-material/EventRounded'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
 import InsertDriveFileRoundedIcon from '@mui/icons-material/InsertDriveFileRounded'
@@ -85,6 +87,14 @@ const Documents = () => {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState({})
   const [openingId, setOpeningId] = useState('')
+  const [editDocument, setEditDocument] = useState(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDegree, setEditDegree] = useState('1')
+  const [editError, setEditError] = useState('')
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
+  const [deleteDocument, setDeleteDocument] = useState(null)
+  const [deleteError, setDeleteError] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const profileEmail = String(profile?.ePosta || '').trim().toLowerCase()
   const isKazim = profileEmail === 'kazim@pikselmutfak.com'
@@ -243,6 +253,54 @@ const Documents = () => {
     }
   }
 
+  const openEditDialog = (document) => {
+    setEditDocument(document)
+    setEditTitle(document.title || '')
+    setEditDegree(String(document.degree || '1'))
+    setEditError('')
+  }
+
+  const onSaveDocument = async () => {
+    if (!editDocument) return
+
+    setIsSavingEdit(true)
+    setEditError('')
+    try {
+      const response = await axios.put(`/api/documents/${editDocument._id}`, {
+        title: editTitle,
+        degree: editDegree
+      }, { headers: { xauth } })
+
+      setDocuments((prev) => prev.map((document) => document._id === editDocument._id ? response.data : document))
+      setEditDocument(null)
+    } catch (e) {
+      setEditError(e?.response?.data?.errorMessage || 'Doküman güncellenemedi.')
+    } finally {
+      setIsSavingEdit(false)
+    }
+  }
+
+  const openDeleteDialog = (document) => {
+    setDeleteDocument(document)
+    setDeleteError('')
+  }
+
+  const onDeleteDocument = async () => {
+    if (!deleteDocument) return
+
+    setIsDeleting(true)
+    setDeleteError('')
+    try {
+      await axios.delete(`/api/documents/${deleteDocument._id}`, { headers: { xauth } })
+      setDocuments((prev) => prev.filter((document) => document._id !== deleteDocument._id))
+      setDeleteDocument(null)
+    } catch (e) {
+      setDeleteError(e?.response?.data?.errorMessage || 'Doküman silinemedi.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const drawer = (
     <Drawer anchor="left" open={menuOpen} onClose={() => setMenuOpen(false)}>
       <Box sx={{ width: 280, p: 1.2, height: '100%', display: 'flex', flexDirection: 'column' }} role="presentation">
@@ -314,9 +372,21 @@ const Documents = () => {
                       </Typography>
                     </Box>
                   </Stack>
-                  <Button variant="outlined" onClick={() => onOpenDocument(document)} disabled={openingId === document._id} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800) }}>
-                    {openingId === document._id ? 'Açılıyor...' : 'Görüntüle'}
-                  </Button>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={0.8}>
+                    <Button variant="outlined" onClick={() => onOpenDocument(document)} disabled={openingId === document._id} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800), flex: 1 }}>
+                      {openingId === document._id ? 'Açılıyor...' : 'Görüntüle'}
+                    </Button>
+                    {isKazim ? (
+                      <>
+                        <Button variant="outlined" startIcon={<EditRoundedIcon />} onClick={() => openEditDialog(document)} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800), flex: 1 }}>
+                          Düzenle
+                        </Button>
+                        <Button variant="outlined" color="error" startIcon={<DeleteRoundedIcon />} onClick={() => openDeleteDialog(document)} sx={{ textTransform: 'none', borderRadius: 2, ...fontStyle(800), flex: 1 }}>
+                          Sil
+                        </Button>
+                      </>
+                    ) : null}
+                  </Stack>
                 </Stack>
               </Paper>
             ))}
@@ -384,6 +454,49 @@ const Documents = () => {
           <Button onClick={() => setUploadOpen(false)} disabled={isUploading} sx={{ textTransform: 'none' }}>Vazgeç</Button>
           <Button variant="contained" onClick={onUploadFiles} disabled={isUploading || selectedFiles.length === 0} sx={{ textTransform: 'none' }}>
             {isUploading ? 'Yükleniyor...' : 'Yükle'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={Boolean(editDocument)} onClose={() => !isSavingEdit && setEditDocument(null)} fullWidth maxWidth="xs">
+        <DialogTitle sx={{ ...fontStyle(900) }}>Dokümanı Düzenle</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={1.4}>
+            {editError ? <Alert severity="error">{editError}</Alert> : null}
+            <TextField label="Doküman İsmi" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} fullWidth autoFocus />
+            <TextField select label="Derece" value={editDegree} onChange={(e) => setEditDegree(e.target.value)} fullWidth>
+              <MenuItem value="1">Çırak</MenuItem>
+              <MenuItem value="2">Kalfa</MenuItem>
+              <MenuItem value="3">Üstat</MenuItem>
+            </TextField>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDocument(null)} disabled={isSavingEdit} sx={{ textTransform: 'none' }}>Vazgeç</Button>
+          <Button variant="contained" onClick={onSaveDocument} disabled={isSavingEdit || !editTitle.trim()} sx={{ textTransform: 'none' }}>
+            {isSavingEdit ? 'Kaydediliyor...' : 'Kaydet'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={Boolean(deleteDocument)} onClose={() => !isDeleting && setDeleteDocument(null)} fullWidth maxWidth="xs">
+        <DialogTitle sx={{ ...fontStyle(900) }}>Dokümanı Sil</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={1.2}>
+            {deleteError ? <Alert severity="error">{deleteError}</Alert> : null}
+            <Typography sx={{ ...fontStyle(700), color: '#17233c' }}>
+              Bu dokümanı silmek istediğinizden emin misiniz?
+            </Typography>
+            <Typography sx={{ ...fontStyle(900), color: '#17233c', wordBreak: 'break-word' }}>
+              {deleteDocument?.title || deleteDocument?.fileName}
+            </Typography>
+            <Alert severity="warning">Bu işlem dokümanı Azure Storage üzerinden de siler.</Alert>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDocument(null)} disabled={isDeleting} sx={{ textTransform: 'none' }}>Vazgeç</Button>
+          <Button variant="contained" color="error" onClick={onDeleteDocument} disabled={isDeleting} sx={{ textTransform: 'none' }}>
+            {isDeleting ? 'Siliniyor...' : 'Sil'}
           </Button>
         </DialogActions>
       </Dialog>

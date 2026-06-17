@@ -4,6 +4,7 @@ const { BlobServiceClient } = require('@azure/storage-blob')
 
 const { authenticate } = require('../middleware/authenticate')
 const { TeneuBlanche } = require('../models/teneuBlanche')
+const { normalizeUploadFileName, sanitizeFileName } = require('../utils/fileName')
 
 const router = express.Router()
 const upload = multer({
@@ -154,7 +155,8 @@ router.post('/teneu-blanche/:id/media', authenticate, upload.array('files', 50),
       const mediaType = getMediaType(file.mimetype)
       if (!mediaType) continue
 
-      const safeName = String(file.originalname || 'media').replace(/[^\w.\-ğüşöçıİĞÜŞÖÇ]+/gi, '-')
+      const originalName = normalizeUploadFileName(file.originalname, 'media')
+      const safeName = sanitizeFileName(originalName, 'media')
       const blobName = `${event._id}/${Date.now()}-${Math.random().toString(16).slice(2)}-${safeName}`
       const blockBlobClient = containerClient.getBlockBlobClient(blobName)
 
@@ -168,7 +170,7 @@ router.post('/teneu-blanche/:id/media', authenticate, upload.array('files', 50),
         type: mediaType,
         url: `${STORAGE_BASE_URL}/${CONTAINER_NAME}/${blobName}`,
         blobName,
-        fileName: file.originalname || '',
+        fileName: originalName || '',
         contentType: file.mimetype || '',
         uploadedBy: req.user._id
       })
