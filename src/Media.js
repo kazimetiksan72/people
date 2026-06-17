@@ -30,6 +30,7 @@ import {
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded'
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
@@ -364,6 +365,15 @@ const Media = () => {
               <ListItemText primary="Medya" />
             </ListItemButton>
           </ListItem>
+<ListItem disablePadding>
+  <ListItemButton onClick={() => {
+    setMenuOpen(false)
+    navigate('/documents')
+  }}>
+    <ListItemIcon><DescriptionRoundedIcon /></ListItemIcon>
+    <ListItemText primary="Dokümanlar" />
+  </ListItemButton>
+</ListItem>
           <ListItem disablePadding>
             <ListItemButton onClick={() => {
               setMenuOpen(false)

@@ -27,6 +27,7 @@ import {
 } from '@mui/material'
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded'
 import EventRoundedIcon from '@mui/icons-material/EventRounded'
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded'
@@ -203,6 +204,15 @@ const Tasks = () => {
                   <ListItemText primary="Medya" />
                 </ListItemButton>
               </ListItem>
+<ListItem disablePadding>
+  <ListItemButton onClick={() => {
+    setMenuOpen(false)
+    navigate('/documents')
+  }}>
+    <ListItemIcon><DescriptionRoundedIcon /></ListItemIcon>
+    <ListItemText primary="Dokümanlar" />
+  </ListItemButton>
+</ListItem>
               <ListItem disablePadding>
                 <ListItemButton onClick={() => {
                   setMenuOpen(false)

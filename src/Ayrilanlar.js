@@ -33,6 +33,7 @@ import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
 import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded'
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded'
 import { keyframes } from '@emotion/react'
 
 const printStyles = `
@@ -270,6 +271,15 @@ const Ayrilanlar = () => {
                   <ListItemText primary="Medya" />
                 </ListItemButton>
               </ListItem>
+<ListItem disablePadding>
+  <ListItemButton onClick={() => {
+    setMenuOpen(false)
+    navigate('/documents')
+  }}>
+    <ListItemIcon><DescriptionRoundedIcon /></ListItemIcon>
+    <ListItemText primary="Dokümanlar" />
+  </ListItemButton>
+</ListItem>
               <ListItem disablePadding>
                 <ListItemButton onClick={() => {
                   setMenuOpen(false)

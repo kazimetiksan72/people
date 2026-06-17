@@ -19,6 +19,8 @@ const routeTask = require('./routes/task');
 app.use('/api', routeTask);
 const routeTeneuBlanche = require('./routes/teneuBlanche');
 app.use('/api', routeTeneuBlanche);
+const routeDocument = require('./routes/document');
+app.use('/api', routeDocument);
 
 const publicPath = path.join(__dirname, '..', 'build')
 app.use(express.static(publicPath))

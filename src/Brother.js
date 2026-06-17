@@ -86,6 +86,19 @@ const getCallNumber = (phone, matrikul) => {
   return `0${digits}`
 }
 
+const getDisplayPhone = (phone, matrikul) => {
+  const digits = normalizePhoneDigits(phone)
+  if (!digits) return ''
+
+  if (isUsPhoneUser(matrikul)) {
+    const normalized = digits.startsWith('1') && digits.length === 11 ? digits.slice(1) : digits
+    return `+1 ${normalized}`
+  }
+
+  const normalized = digits.startsWith('90') && digits.length >= 12 ? digits.slice(2) : digits.startsWith('0') ? digits.slice(1) : digits
+  return `+90 ${normalized}`
+}
+
 const getWhatsAppNumber = (phone, matrikul) => {
   const digits = normalizePhoneDigits(phone)
   if (!digits) return ''
@@ -131,6 +144,14 @@ const formatLongDateTr = (value) => {
   }
 
   return text
+}
+
+const escapeVCardText = (value) => {
+  return String(value || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/\n/g, '\\n')
+    .replace(/,/g, '\\,')
+    .replace(/;/g, '\\;')
 }
 
 const formatDateOnlyTr = (value) => {
@@ -411,6 +432,7 @@ export default function Brother() {
   }
 
   const callNumber = getCallNumber(user.tlfGsmEvIs, user.matrikul)
+  const displayPhone = getDisplayPhone(user.tlfGsmEvIs, user.matrikul)
   const waNumber = getWhatsAppNumber(user.tlfGsmEvIs, user.matrikul)
   const waLink = waNumber ? `https://wa.me/${waNumber}` : ''
   const avatarSrc = user.photoUrl
@@ -426,6 +448,28 @@ export default function Brother() {
   const separationDateText = formatDateOnlyTr(user?.silinmeTarihi) || '-'
   const separationReasonText = String(user?.silinmeNedeni || '').trim() || '-'
   const degreeTitle = getDegreeTitle(user?.derece)
+
+  const onSaveContact = () => {
+    const fullName = safeText(user.adSoyad)
+    const vcard = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `FN:${escapeVCardText(fullName)}`,
+      callNumber ? `TEL;TYPE=CELL:${callNumber}` : '',
+      user.ePosta ? `EMAIL:${escapeVCardText(user.ePosta)}` : '',
+      'END:VCARD'
+    ].filter(Boolean).join('\n')
+
+    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${fullName.replace(/[^\wğüşöçıİĞÜŞÖÇ.-]+/gi, '-')}.vcf`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+  }
 
   const openEditDialog = () => {
     setFormError('')
@@ -642,7 +686,7 @@ export default function Brother() {
     {
       title: 'İletişim',
       rows: [
-        { label: 'Telefon', value: user.tlfGsmEvIs, icon: <PhoneRoundedIcon fontSize="small" />, link: callNumber ? `tel:${callNumber}` : undefined },
+        { label: 'Telefon', value: displayPhone || user.tlfGsmEvIs, icon: <PhoneRoundedIcon fontSize="small" />, link: callNumber ? `tel:${callNumber}` : undefined },
         { label: 'E-posta', value: user.ePosta, icon: <EmailRoundedIcon fontSize="small" />, link: user.ePosta ? `mailto:${user.ePosta}` : undefined },
         { label: 'Ev Adresi', value: user.evAdresi, icon: <HomeRoundedIcon fontSize="small" /> }
       ]
@@ -839,6 +883,26 @@ export default function Brother() {
                     </Button>
                   ))}
                 </Box>
+                {isMobile ? (
+                  <Button
+                    className="no-print"
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<PersonRoundedIcon />}
+                    onClick={onSaveContact}
+                    disabled={!callNumber && !user.ePosta}
+                    sx={{
+                      mt: 1,
+                      textTransform: 'none',
+                      borderRadius: 2,
+                      fontFamily: 'Open Sans',
+                      fontWeight: 800,
+                      minHeight: 44
+                    }}
+                  >
+                    Telefona Kaydet
+                  </Button>
+                ) : null}
 
                 {canEditProfile || canDeleteAsKazim ? (
                   <Stack direction="row" spacing={1} sx={{ mt: 1, alignItems: 'center' }}>

@@ -33,6 +33,7 @@ import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
 import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded'
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded'
 import { keyframes } from '@emotion/react'
 
 const printStyles = `
@@ -76,6 +77,55 @@ const printStyles = `
 `
 
 const normalize = (value) => (value || '').toString().toLowerCase().trim()
+
+const normalizePhoneDigits = (phone) => {
+  if (!phone) return ''
+  return String(phone).replace(/\D/g, '')
+}
+
+const isUsPhoneUser = (matrikul) => String(matrikul || '') === '39285'
+
+const getDisplayPhone = (phone, matrikul) => {
+  const digits = normalizePhoneDigits(phone)
+  if (!digits) return ''
+
+  if (isUsPhoneUser(matrikul)) {
+    const normalized = digits.startsWith('1') && digits.length === 11 ? digits.slice(1) : digits
+    return `+1 ${normalized}`
+  }
+
+  const normalized = digits.startsWith('90') && digits.length >= 12 ? digits.slice(2) : digits.startsWith('0') ? digits.slice(1) : digits
+  return `+90 ${normalized}`
+}
+
+const getCallNumber = (phone, matrikul) => {
+  const digits = normalizePhoneDigits(phone)
+  if (!digits) return ''
+
+  if (isUsPhoneUser(matrikul)) {
+    const normalized = digits.startsWith('1') && digits.length === 11 ? digits.slice(1) : digits
+    return `+1${normalized}`
+  }
+
+  if (digits.startsWith('0')) return digits
+  if (digits.startsWith('90') && digits.length >= 12) return `+${digits}`
+  return `0${digits}`
+}
+
+const getWhatsappNumber = (phone, matrikul) => {
+  const digits = normalizePhoneDigits(phone)
+  if (!digits) return ''
+
+  if (isUsPhoneUser(matrikul)) {
+    const normalized = digits.startsWith('1') && digits.length === 11 ? digits.slice(1) : digits
+    return `1${normalized}`
+  }
+
+  const normalized = digits.startsWith('0') ? digits.slice(1) : digits
+  if (normalized.length === 10) return `90${normalized}`
+  if (normalized.startsWith('90') && normalized.length >= 12) return normalized
+  return normalized
+}
 
 const rowEnter = keyframes`
   from {
@@ -142,14 +192,16 @@ const Home = () => {
     navigate(`/brother/${p.matrikul}`, { state: { person: p } })
   }
 
-  const onPhone = (phone) => {
+  const onPhone = (phone, matrikul) => {
     if (!phone) return
-    window.location.href = `tel:0${phone}`
+    const callNumber = getCallNumber(phone, matrikul)
+    if (callNumber) window.location.href = `tel:${callNumber}`
   }
 
   const onWhatsapp = (phone, matrikul) => {
     if (!phone) return
-    window.location.href = matrikul === '39285' ? `https://wa.me/1${phone}` : `https://wa.me/90${phone}`
+    const whatsappNumber = getWhatsappNumber(phone, matrikul)
+    if (whatsappNumber) window.location.href = `https://wa.me/${whatsappNumber}`
   }
 
   const onEmail = (mail) => {
@@ -283,6 +335,15 @@ const Home = () => {
                   <ListItemText primary="Medya" />
                 </ListItemButton>
               </ListItem>
+<ListItem disablePadding>
+  <ListItemButton onClick={() => {
+    setMenuOpen(false)
+    navigate('/documents')
+  }}>
+    <ListItemIcon><DescriptionRoundedIcon /></ListItemIcon>
+    <ListItemText primary="Dokümanlar" />
+  </ListItemButton>
+</ListItem>
               <ListItem disablePadding>
                 <ListItemButton onClick={() => {
                   setMenuOpen(false)
@@ -453,7 +514,7 @@ const Home = () => {
                     </Stack>
 
                     <Typography sx={{ ...fontStyle(500), fontSize: 13.2, opacity: 0.9, mt: 0.7 }}>
-                      {p.tlfGsmEvIs}
+                      {getDisplayPhone(p.tlfGsmEvIs, p.matrikul)}
                     </Typography>
                     <Typography sx={{ ...fontStyle(500), fontSize: 12.8, opacity: 0.88 }}>
                       {p.ePosta}
@@ -473,7 +534,7 @@ const Home = () => {
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation()
-                          onPhone(p.tlfGsmEvIs)
+                          onPhone(p.tlfGsmEvIs, p.matrikul)
                         }}
                         sx={{ ...fontStyle(700), textTransform: 'none', borderRadius: 2, flex: 1, minWidth: 0, px: 1 }}
                       >
@@ -541,7 +602,7 @@ const Home = () => {
                   </Typography>
 
                   <Typography sx={{ display: { xs: 'none', md: 'block' }, ...fontStyle(500), fontSize: 13.5 }}>
-                    {p.tlfGsmEvIs}
+                    {getDisplayPhone(p.tlfGsmEvIs, p.matrikul)}
                   </Typography>
 
                   <Box className="no-print" sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'flex-end' }}>

@@ -22,6 +22,7 @@ import NeverBrotherDies from './NeverBrotherDies'
 import Ayrilanlar from './Ayrilanlar'
 import Tasks from './Tasks'
 import Media from './Media'
+import Documents from './Documents'
 
 const App = () => {
 
@@ -49,6 +50,7 @@ const App = () => {
             <Route path='/tasks' element={<Tasks />} />
             <Route path='/medya' element={<Media />} />
             <Route path='/medya/:id' element={<Media />} />
+            <Route path='/documents' element={<Documents />} />
             <Route path='/teneu-blanche' element={<Navigate to='/medya' replace />} />
             <Route path='/brother/:matrikul' element={<Brother />} />
             <Route path='/signin' element={<SignIn />} />

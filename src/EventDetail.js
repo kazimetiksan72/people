@@ -36,6 +36,7 @@ import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded'
 import PersonRemoveRoundedIcon from '@mui/icons-material/PersonRemoveRounded'
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
+import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded'
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded'
 import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded'
@@ -338,6 +339,15 @@ const EventDetail = () => {
                 <ListItemText primary="Medya" />
               </ListItemButton>
             </ListItem>
+<ListItem disablePadding>
+  <ListItemButton onClick={() => {
+    setMenuOpen(false)
+    navigate('/documents')
+  }}>
+    <ListItemIcon><DescriptionRoundedIcon /></ListItemIcon>
+    <ListItemText primary="Dokümanlar" />
+  </ListItemButton>
+</ListItem>
             <ListItem disablePadding>
               <ListItemButton onClick={() => {
                 setMenuOpen(false)
