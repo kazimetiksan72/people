@@ -55,14 +55,45 @@ const safeText = (value) => {
   return text.length > 0 ? text : '-'
 }
 
+const getDegreeTitle = (degree) => {
+  const titles = {
+    1: 'Çırak',
+    2: 'Kalfa',
+    3: 'Üstat'
+  }
+
+  return titles[String(degree || '').trim()] || ''
+}
+
 const normalizePhoneDigits = (phone) => {
   if (!phone) return ''
   return String(phone).replace(/\D/g, '')
 }
 
-const getWhatsAppNumber = (phone) => {
+const isUsPhoneUser = (matrikul) => String(matrikul || '') === '39285'
+
+const getCallNumber = (phone, matrikul) => {
   const digits = normalizePhoneDigits(phone)
   if (!digits) return ''
+
+  if (isUsPhoneUser(matrikul)) {
+    const normalized = digits.startsWith('1') && digits.length === 11 ? digits.slice(1) : digits
+    return `+1${normalized}`
+  }
+
+  if (digits.startsWith('0')) return digits
+  if (digits.startsWith('90') && digits.length >= 12) return `+${digits}`
+  return `0${digits}`
+}
+
+const getWhatsAppNumber = (phone, matrikul) => {
+  const digits = normalizePhoneDigits(phone)
+  if (!digits) return ''
+
+  if (isUsPhoneUser(matrikul)) {
+    const normalized = digits.startsWith('1') && digits.length === 11 ? digits.slice(1) : digits
+    return `1${normalized}`
+  }
 
   const normalized = digits.startsWith('0') ? digits.slice(1) : digits
   if (normalized.length === 10) return `90${normalized}`
@@ -379,8 +410,8 @@ export default function Brother() {
     )
   }
 
-  const phoneDigits = normalizePhoneDigits(user.tlfGsmEvIs)
-  const waNumber = getWhatsAppNumber(user.tlfGsmEvIs)
+  const callNumber = getCallNumber(user.tlfGsmEvIs, user.matrikul)
+  const waNumber = getWhatsAppNumber(user.tlfGsmEvIs, user.matrikul)
   const waLink = waNumber ? `https://wa.me/${waNumber}` : ''
   const avatarSrc = user.photoUrl
     ? `${user.photoUrl}?v=${encodeURIComponent(user.updatedAt || '')}`
@@ -394,6 +425,7 @@ export default function Brother() {
   const isRemovedFromList = user?.listedeGorunsun === false
   const separationDateText = formatDateOnlyTr(user?.silinmeTarihi) || '-'
   const separationReasonText = String(user?.silinmeNedeni || '').trim() || '-'
+  const degreeTitle = getDegreeTitle(user?.derece)
 
   const openEditDialog = () => {
     setFormError('')
@@ -610,7 +642,7 @@ export default function Brother() {
     {
       title: 'İletişim',
       rows: [
-        { label: 'Telefon', value: user.tlfGsmEvIs, icon: <PhoneRoundedIcon fontSize="small" />, link: phoneDigits ? `tel:${phoneDigits}` : undefined },
+        { label: 'Telefon', value: user.tlfGsmEvIs, icon: <PhoneRoundedIcon fontSize="small" />, link: callNumber ? `tel:${callNumber}` : undefined },
         { label: 'E-posta', value: user.ePosta, icon: <EmailRoundedIcon fontSize="small" />, link: user.ePosta ? `mailto:${user.ePosta}` : undefined },
         { label: 'Ev Adresi', value: user.evAdresi, icon: <HomeRoundedIcon fontSize="small" /> }
       ]
@@ -623,7 +655,7 @@ export default function Brother() {
       label: 'Ara',
       icon: <PhoneRoundedIcon />,
       variant: 'outlined',
-      href: phoneDigits ? `tel:${phoneDigits}` : undefined
+      href: callNumber ? `tel:${callNumber}` : undefined
     },
     {
       key: 'email',
@@ -737,6 +769,11 @@ export default function Brother() {
                 <Typography sx={{ fontFamily: 'Open Sans', fontWeight: 900, fontSize: { xs: 28, md: 38 }, color: '#0f1a2e', lineHeight: 1.03 }}>
                   {safeText(user.adSoyad)}
                 </Typography>
+                {degreeTitle ? (
+                  <Typography sx={{ mt: 0.55, fontFamily: 'Open Sans', fontWeight: 800, fontSize: { xs: 15, md: 17 }, color: '#2563eb' }}>
+                    {degreeTitle}
+                  </Typography>
+                ) : null}
 
                 <Stack direction="row" spacing={0.8} sx={{ mt: 1, flexWrap: 'wrap', rowGap: 0.7 }}>
                   <Chip
