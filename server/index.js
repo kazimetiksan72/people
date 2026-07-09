@@ -22,6 +22,15 @@ app.use('/api', routeTeneuBlanche);
 const routeDocument = require('./routes/document');
 app.use('/api', routeDocument);
 
+const presentationPath = path.join(__dirname, '..', 'sunum')
+app.use('/sunum', express.static(presentationPath, {
+    fallthrough: false,
+    setHeaders: (res) => {
+        res.setHeader('Content-Type', 'application/pdf')
+        res.setHeader('Cache-Control', 'public, max-age=3600')
+    }
+}))
+
 const publicPath = path.join(__dirname, '..', 'build')
 app.use(express.static(publicPath))
 
