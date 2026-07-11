@@ -22,6 +22,10 @@ app.use('/api', routeTeneuBlanche);
 const routeDocument = require('./routes/document');
 app.use('/api', routeDocument);
 
+app.use('/sunum', (req, res) => {
+    res.sendStatus(404)
+})
+
 const publicPath = path.join(__dirname, '..', 'build')
 app.use(express.static(publicPath))
 
