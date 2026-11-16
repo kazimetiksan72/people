@@ -70,24 +70,17 @@ const SignIn = () => {
         {/* ÜST KONSEPT */}
         <Box sx={{ textAlign: "center", mb: 2 }}>
           <Box
+            component="img"
+            src="/ida-logo.png"
+            alt="Ayvalık İDA Muhterem Locası logosu"
             sx={{
-              width: 84,
-              height: 44,
+              width: { xs: 118, sm: 136 },
+              height: { xs: 118, sm: 136 },
               mx: "auto",
-              borderRadius: 2,
-              display: "grid",
-              placeItems: "center",
-              border: "1px solid #E5E7EB",
-              color: "#C8A24A",
-              fontWeight: 700,
-              letterSpacing: "0.22em",
-              pl: "0.22em",
-              userSelect: "none",
-              fontSize: 24,
+              display: "block",
+              objectFit: "contain",
             }}
-          >
-            İDA
-          </Box>
+          />
 
           <Box
             sx={{
